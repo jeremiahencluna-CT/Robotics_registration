@@ -170,9 +170,25 @@ td:first-child { font-weight: 700; }
   .steps { gap: 2px; }
   .step { padding: 5px 2px; }
 }
-</style>
+
+/* Firebase administrator sign-in */
+.auth-gate{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(8,12,22,.86);backdrop-filter:blur(8px)}
+.auth-card{width:min(100%,430px);background:var(--panel,#fff);color:var(--text,#182033);border-radius:20px;padding:28px;box-shadow:0 24px 80px rgba(0,0,0,.3)}
+.auth-card h2{margin:0 0 8px}.auth-card p{line-height:1.5}.auth-card label{display:block;font-weight:600;margin:14px 0 6px}.auth-card input{width:100%;box-sizing:border-box}.auth-error{color:#b42318;min-height:1.3em;font-size:.92rem}.auth-card button{width:100%;margin-top:16px}.auth-card .auth-muted{font-size:.84rem;opacity:.75}
+
 </head>
 <body>
+<div id="firebaseAuthGate" class="auth-gate" hidden>
+  <form id="firebaseLoginForm" class="auth-card">
+    <h2>Administrator sign in</h2>
+    <p>Sign in with your authorized account to manage RoboZ participant records.</p>
+    <label for="firebaseEmail">Email address</label><input id="firebaseEmail" type="email" autocomplete="username" required class="field" placeholder="Administrator email">
+    <label for="firebasePassword">Password</label><input id="firebasePassword" type="password" autocomplete="current-password" required class="field" placeholder="Password">
+    <div id="firebaseAuthError" class="auth-error" role="alert"></div>
+    <button id="firebaseLoginButton" class="btn primary" type="submit">Sign in</button>
+    <p class="auth-muted">Account creation is disabled on this website. Add administrator accounts in Firebase Console.</p>
+  </form>
+</div>
 <div class="app">
   <aside class="sidebar" aria-label="Main navigation">
     <div class="brand">
@@ -193,7 +209,7 @@ td:first-child { font-weight: 700; }
         <h1 id="pageTitle">Participant Registration</h1>
         <div class="top-sub" id="pageSub">Register a school team in a few clear steps.</div>
       </div>
-      <div class="admin"><div class="avatar" aria-hidden="true">AD</div><span>Admin</span></div>
+      <div class="admin"><div class="avatar" aria-hidden="true">AD</div><span id="adminEmailLabel">Admin</span><button class="btn small" id="firebaseSignOut" type="button">Sign out</button></div>
     </header>
 
     <div class="content">
@@ -327,92 +343,111 @@ td:first-child { font-weight: 700; }
   </form>
 </dialog>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
-/*
- * Robotics Participant Management — Google Sheets bridge
- *
- * Set API_URL to the deployed Apps Script Web App URL ending in /exec.
- * This bridge uses a hidden form + iframe, not fetch(), to avoid the common
- * cross-origin/CORS limitation of Apps Script ContentService endpoints.
- *
- * The Apps Script must restrict access to the authorized school Google accounts.
- * Do not treat a URL embedded in public HTML as a secret.
- */
-const ROBOTICS_API_URL = "https://script.google.com/macros/s/AKfycbxs5kEG9Rl0yDp-hUqTwjfrjrWhGFAUy8sDDcvy6M40ps0fm3BuPTZPHqOHMlCl1wrYlQ/exec";
-
+/* Firebase client setup. The API key identifies the project; Firestore Rules enforce access. */
+const firebaseConfig = {
+  apiKey: "AIzaSyBkfApT_JC5tP76FlXHV-jqS0x7lwEvmmw",
+  authDomain: "roboz-participant-management.firebaseapp.com",
+  projectId: "roboz-participant-management",
+  storageBucket: "roboz-participant-management.firebasestorage.app",
+  messagingSenderId: "210193523600",
+  appId: "1:210193523600:web:fa0fe241887791835d8915",
+  measurementId: "G-MFKWGPYKQ5"
+};
+const FIREBASE_ADMIN_UID = "S0URKSpcOmNaK7w8WSVFrLlfnUD2";
+firebase.initializeApp(firebaseConfig);
+const firebaseAuth = firebase.auth();
+const firestore = firebase.firestore();
 const RoboticsSheetsAPI = (() => {
-  let frame;
-  const pending = new Map();
-
-  function ensureFrame() {
-    if (frame) return frame;
-    frame = document.createElement("iframe");
-    frame.name = "roboticsSheetsApiFrame";
-    frame.title = "Google Sheets connection";
-    frame.style.display = "none";
-    document.body.appendChild(frame);
-    return frame;
+  const teamsCollection = () => firestore.collection("teams");
+  const normalize = (doc) => ({ id: doc.id, ...doc.data() });
+  async function load() {
+    if (!firebaseAuth.currentUser || firebaseAuth.currentUser.uid !== FIREBASE_ADMIN_UID) throw new Error("Sign in with the authorized administrator account.");
+    const snap = await teamsCollection().get();
+    return { ok:true, teams:snap.docs.map(normalize) };
   }
-
-  window.addEventListener("message", event => {
-    const data = event.data;
-    if (!data || !data.nonce || !pending.has(data.nonce)) return;
-    const request = pending.get(data.nonce);
-    if (event.source !== request.frame.contentWindow) return;
-    pending.delete(data.nonce);
-    clearTimeout(request.timeout);
-    request.form.remove();
-    if (data.result && data.result.ok) request.resolve(data.result);
-    else request.reject(new Error((data.result && data.result.error) || "The database request failed."));
-  });
-
-  function request(method, action, payload = {}) {
-    return new Promise((resolve, reject) => {
-      if (!ROBOTICS_API_URL || ROBOTICS_API_URL.includes("PASTE_YOUR")) {
-        reject(new Error("Set ROBOTICS_API_URL to your deployed Apps Script Web App URL first."));
-        return;
+  async function saveTeam(team) {
+    if (!firebaseAuth.currentUser || firebaseAuth.currentUser.uid !== FIREBASE_ADMIN_UID) throw new Error("Not authorized. Sign in with the administrator account.");
+    const existingId = team.teamId && String(team.teamId).length > 8 ? String(team.teamId) : "";
+    const ref = existingId ? teamsCollection().doc(existingId) : teamsCollection().doc();
+    const result = await firestore.runTransaction(async tx => {
+      const snap = await tx.get(teamsCollection());
+      const all = snap.docs.map(normalize).filter(t => t.id !== ref.id);
+      const names = (team.names || []).map(n => String(n).trim()).filter(Boolean);
+      const seen = new Set();
+      for (const name of names) {
+        const key = name.toLocaleLowerCase();
+        if (seen.has(key)) throw new Error('Duplicate participant name in this team: ' + name);
+        seen.add(key);
+        if (all.some(t => (t.names || []).some(n => String(n).toLocaleLowerCase() === key))) throw new Error('"' + name + '" is already registered on another team.');
       }
-      const apiFrame = ensureFrame();
-      const nonce = (window.crypto && crypto.randomUUID)
-        ? crypto.randomUUID()
-        : "req-" + Date.now() + "-" + Math.random().toString(16).slice(2);
-      const form = document.createElement("form");
-      form.method = method;
-      form.action = ROBOTICS_API_URL;
-      form.target = apiFrame.name;
-      form.style.display = "none";
-
-      const fields = { action, nonce };
-      if (method === "POST") fields.payload = JSON.stringify(payload);
-      Object.entries(fields).forEach(([name, value]) => {
-        const input = document.createElement("input");
-        input.type = "hidden";
-        input.name = name;
-        input.value = value;
-        form.appendChild(input);
+      const div = String(team.division || ""), game = String(team.game || ""), category = String(team.category || "");
+      const key = game === "Zumobot" ? category : game;
+      const sequenceKey = div + "|" + key;
+      const prefix = (typeof getCodePrefix === "function") ? getCodePrefix(div, game, category) : "";
+      if (!prefix) throw new Error("No participant-code prefix is configured for this division/game/category.");
+      const usedCodes = new Set(all.flatMap(t => (t.codes || []).filter((code,i) => (t.codeKeys || [])[i] === sequenceKey)));
+      let next = 1;
+      const codes = names.map(() => {
+        let code;
+        do { code = prefix + "-" + String(next++).padStart(3,"0"); } while (usedCodes.has(code));
+        usedCodes.add(code); return code;
       });
-      document.body.appendChild(form);
-
-      const timeout = setTimeout(() => {
-        pending.delete(nonce);
-        form.remove();
-        reject(new Error("The request timed out. Check that you are signed in with an authorized school Google account and that the Apps Script deployment is current."));
-      }, 25000);
-
-      pending.set(nonce, { resolve, reject, frame: apiFrame, form, timeout });
-      form.submit();
+      const teamKey = [div,game,category].join("|");
+      const sameGroup = all.filter(t => [t.division,t.game,t.category || ""].join("|") === teamKey);
+      const data = {
+        school:String(team.school || "").trim(), division:div, game, category,
+        names, codes, codeKeys:names.map(() => sequenceKey), teamName:String(team.teamName || ""),
+        teamNo:sameGroup.length + 1, status:"Active", updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+      };
+      if (!data.school || !names.length) throw new Error("School and at least one participant are required.");
+      if (game === "Z-Puck Tri-Bot Hockey" ? names.length > 3 : names.length > 2) throw new Error("Participant limit exceeded for this game.");
+      if (!existingId) data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+      tx.set(ref, data);
+      return { id:ref.id, ...data, teamNo:data.teamNo };
     });
+    return { ok:true, team:result };
   }
-
-  return {
-    health: () => request("GET", "health"),
-    load: () => request("GET", "load"),
-    saveTeam: team => request("POST", "saveTeam", team),
-    deleteTeam: teamId => request("POST", "deleteTeam", { teamId: String(teamId) }),
-    importTeams: teams => request("POST", "importTeams", { teams })
-  };
+  async function deleteTeam(teamId) {
+    if (!firebaseAuth.currentUser || firebaseAuth.currentUser.uid !== FIREBASE_ADMIN_UID) throw new Error("Not authorized.");
+    await teamsCollection().doc(String(teamId)).delete();
+    return {ok:true};
+  }
+  async function importTeams(teams) {
+    const saved=[];
+    for (const team of teams) saved.push((await saveTeam(team)).team);
+    return {ok:true, teams:saved};
+  }
+  return { load, saveTeam, deleteTeam, importTeams };
 })();
 
+const authGate = document.getElementById("firebaseAuthGate");
+document.getElementById("firebaseLoginForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  const button=document.getElementById("firebaseLoginButton"), error=document.getElementById("firebaseAuthError");
+  button.disabled=true; button.textContent="Signing in…"; error.textContent="";
+  try {
+    const credential=await firebaseAuth.signInWithEmailAndPassword(document.getElementById("firebaseEmail").value.trim(),document.getElementById("firebasePassword").value);
+    if (credential.user.uid !== FIREBASE_ADMIN_UID) { await firebaseAuth.signOut(); throw new Error("This account is not authorized to manage RoboZ records."); }
+  } catch(e) { error.textContent=e.code === "auth/invalid-credential" ? "Email or password is incorrect." : (e.message || "Sign-in failed."); }
+  finally { button.disabled=false; button.textContent="Sign in"; }
+});
+document.getElementById("firebaseSignOut").addEventListener("click",()=>firebaseAuth.signOut());
+firebaseAuth.onAuthStateChanged(async user => {
+  if (user && user.uid === FIREBASE_ADMIN_UID) {
+    authGate.hidden=true;
+    document.getElementById("adminEmailLabel").textContent=user.email || "Admin";
+    if (typeof init === "function") await init();
+  } else {
+    if (user) await firebaseAuth.signOut();
+    authGate.hidden=false;
+    document.getElementById("adminEmailLabel").textContent="Signed out";
+    databaseReady=false;
+  }
+});
 </script>
 <script>
 "use strict";
@@ -464,19 +499,19 @@ async function loadDatabaseFromSheets(showMessage = false) {
     refreshSchoolOptions($("schoolSelect").value);
     renderTeams(); renderPreview(); updateStats();
     databaseReady = true;
-    if (showMessage) showStatus("Connected to Google Sheets. Saved records are up to date.", "ok");
+    if (showMessage) showStatus("Connected to Firebase. Saved records are up to date.", "ok");
     return true;
   } catch (error) {
     databaseReady = false;
-    if (showMessage) showStatus("Google Sheets connection failed: " + error.message, "err");
-    console.error("Google Sheets load failed:", error);
+    if (showMessage) showStatus("Firebase connection failed: " + error.message, "err");
+    console.error("Firebase load failed:", error);
     return false;
   } finally {
     databaseBusy = false;
   }
 }
 async function saveTeamToSheets(team) {
-  if (!databaseReady) throw new Error("The website is not connected to Google Sheets yet. Refresh and check the connection message.");
+  if (!databaseReady) throw new Error("The website is not connected to Firebase yet. Refresh and check the connection message.");
   const result = await RoboticsSheetsAPI.saveTeam({
     teamId: team.id && String(team.id).length > 8 ? String(team.id) : "",
     school: team.school, division: team.division, game: team.game,
@@ -681,11 +716,11 @@ $("addBtn").addEventListener("click", async ()=>{
   if(duplicate){showStatus(`${duplicate} is already registered. Check the saved records before continuing.`);return;}
   const team = { school, division, game, category: needsZumobotCategory() ? category : "", names:[...currentMembers], teamName:"" };
   $("addBtn").disabled = true;
-  showStatus("Saving registration to Google Sheets…", "ok");
+  showStatus("Saving registration to Firebase…", "ok");
   try {
     const saved = await saveTeamToSheets(team);
     replaceTeamLocally(saved);
-    showStatus(`Team ${saved.teamNo} registered for ${school}. Saved to Google Sheets.`, "ok");
+    showStatus(`Team ${saved.teamNo} registered for ${school}. Saved to Firebase.`, "ok");
     resetForm(true);
   } catch (error) {
     showStatus("Registration was not saved: " + error.message, "err");
@@ -741,11 +776,11 @@ function renumberTeams() {
 }
 async function deleteTeam(id) {
   const t=teams.find(item=>String(item.id)===String(id));if(!t)return;
-  if(!window.confirm(`Delete Team ${t.teamNo} from ${t.school}? This removes ${t.names.length} participant record(s) from Google Sheets.`))return;
+  if(!window.confirm(`Delete Team ${t.teamNo} from ${t.school}? This removes ${t.names.length} participant record(s) from Firebase.`))return;
   try {
     await RoboticsSheetsAPI.deleteTeam(String(id));
     teams=teams.filter(item=>String(item.id)!==String(id));renumberTeams();refreshSchoolOptions($("schoolSelect").value);renderTeams();renderPreview();updateStats();
-    showStatus("Team and its participant records were deleted from Google Sheets.", "ok");
+    showStatus("Team and its participant records were deleted from Firebase.", "ok");
   } catch(error) {
     showStatus("Delete failed: " + error.message, "err");
   }
@@ -769,13 +804,13 @@ $("teamEditForm").addEventListener("submit",async e=>{
   const updated = {id:t.id, school, division:div, game:selectedGame, category:selectedGame==="Zumobot"?category:"", names, teamName:t.teamName||""};
   const submitButton = $("teamEditForm").querySelector('button[type="submit"]');
   if (submitButton) submitButton.disabled = true;
-  $("editTeamStatus").textContent="Saving changes to Google Sheets…";
+  $("editTeamStatus").textContent="Saving changes to Firebase…";
   $("editTeamStatus").className="status show";
   try {
     const saved = await saveTeamToSheets(updated);
     replaceTeamLocally(saved, id);
     $("teamEditDialog").close();
-    showStatus("Team changes saved to Google Sheets.", "ok");
+    showStatus("Team changes saved to Firebase.", "ok");
   } catch(error) {
     setEditError("Changes were not saved: " + error.message);
   } finally {
@@ -963,10 +998,10 @@ $("confirmImportBtn").addEventListener("click",async ()=>{
       category: group.category, names: group.names
     }));
     $("confirmImportBtn").disabled = true;
-    setImportStatus("Importing records into Google Sheets…", "ok");
+    setImportStatus("Importing records into Firebase…", "ok");
     await RoboticsSheetsAPI.importTeams(importPayload);
     await loadDatabaseFromSheets(false);
-    setImportStatus(`Successfully imported ${valid.length} participant(s) across ${groups.size} team(s) into Google Sheets.`, "ok");
+    setImportStatus(`Successfully imported ${valid.length} participant(s) across ${groups.size} team(s) into Firebase.`, "ok");
   } catch(error) {
     setImportStatus("Import failed: " + error.message, "err");
     return;
@@ -978,12 +1013,11 @@ $("confirmImportBtn").addEventListener("click",async ()=>{
 
 async function init() {
   updateSummary();renderMembers();renderTeams();renderPreview();updateStats();
-  showStatus("Connecting to Google Sheets…", "ok");
+  showStatus("Loading participant records from Firebase…", "ok");
   const connected = await loadDatabaseFromSheets(false);
-  if (connected) showStatus("Connected to Google Sheets. Registrations will be saved online.", "ok");
-  else showStatus("Could not connect to Google Sheets. Check Apps Script deployment access and the authorized account before registering real participants.", "err");
+  if (connected) showStatus("Connected to Firebase. Registrations will be saved online.", "ok");
+  else showStatus("Could not load Firebase records. Check your connection and Firestore security rules.", "err");
 }
-init();
 </script>
 
 
