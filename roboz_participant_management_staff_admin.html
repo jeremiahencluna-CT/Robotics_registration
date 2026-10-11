@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#062f2d">
+<title>Robotics Competition | Participant Registration</title>
+<style>
+:root {
+  --green: #07884f;
+  --green-dark: #062f2d;
+  --mint: #dcfce9;
+  --bg: #f3f8f8;
+  --ink: #12213e;
+  --muted: #6b7b98;
+  --line: #e1e9ee;
+  --white: #fff;
+  --danger: #b42318;
+  --shadow: 0 4px 18px rgba(16, 44, 66, .06);
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--ink); }
+button, input, select { font: inherit; }
+button { cursor: pointer; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid rgba(7,136,79,.28); outline-offset: 2px; }
+.app { min-height: 100vh; display: grid; grid-template-columns: 244px minmax(0,1fr); }
+.sidebar { background: linear-gradient(180deg,#062f2d,#071f2a); color: white; padding: 24px 15px; display: flex; flex-direction: column; gap: 30px; }
+.brand { display: flex; gap: 11px; align-items: center; padding: 0 7px; }
+.brand-mark { width: 43px; height: 43px; display: grid; place-items: center; border-radius: 13px; background: #07884f; font-size: 13px; font-weight: 850; letter-spacing: .04em; }
+.brand strong { display: block; font-size: 14px; line-height: 1.3; }
+.brand small { display: block; color: #b6d0d2; font-size: 11px; margin-top: 4px; }
+.nav { display: grid; gap: 7px; }
+.nav button { border: 0; background: transparent; color: #d9e8e9; text-align: left; padding: 13px 14px; border-radius: 11px; display: flex; align-items: center; gap: 11px; font-size: 13px; }
+.nav button:hover { background: rgba(255,255,255,.08); }
+.nav button.active { background: #d8fae9; color: #075b40; font-weight: 750; }
+.nav .nav-icon { width: 22px; text-align: center; font-size: 17px; }
+.sidebar-note { margin-top: auto; color: #9ab8b9; font-size: 11px; line-height: 1.6; padding: 10px; }
+.main { min-width: 0; }
+.topbar { background: white; border-bottom: 1px solid var(--line); padding: 17px 30px; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.eyebrow { font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: var(--green); font-weight: 800; margin-bottom: 5px; }
+.topbar h1 { margin: 0; font-size: clamp(20px,2.3vw,27px); letter-spacing: -.035em; }
+.top-sub { color: var(--muted); font-size: 12px; margin-top: 6px; line-height: 1.5; }
+.admin { display: flex; align-items: center; gap: 9px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--green-dark); color: white; display: grid; place-items: center; font-size: 11px; }
+.content { max-width: 1450px; margin: auto; padding: 24px 30px 40px; }
+.intro { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; margin-bottom: 18px; }
+.intro h2 { font-size: clamp(20px,2vw,25px); margin: 0; letter-spacing: -.035em; }
+.intro p { color: var(--muted); margin: 7px 0 0; font-size: 13px; line-height: 1.55; max-width: 650px; }
+.btn { border: 1px solid #dce5ed; border-radius: 10px; padding: 10px 14px; background: white; color: var(--ink); font-weight: 700; font-size: 12px; transition: .15s ease; }
+.btn:hover { transform: translateY(-1px); }
+.btn.primary { background: var(--green); border-color: var(--green); color: white; }
+.btn.primary:hover { background: #067647; }
+.btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+.stats { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; margin-bottom: 20px; }
+.stat { background: white; border: 1px solid var(--line); border-radius: 14px; padding: 15px 17px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 12px; min-width: 0; }
+.stat-icon { width: 39px; height: 39px; border-radius: 11px; background: var(--mint); color: var(--green); display: grid; place-items: center; font-size: 18px; flex-shrink: 0; }
+.stat small { display: block; color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 5px; }
+.stat strong { display: block; font-size: 24px; line-height: 1; letter-spacing: -.04em; }
+.panel { background: white; border: 1px solid var(--line); border-radius: 16px; padding: 20px; box-shadow: var(--shadow); margin-bottom: 16px; }
+.panel-head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 18px; }
+.panel-icon { width: 39px; height: 39px; border-radius: 12px; display: grid; place-items: center; background: var(--mint); color: var(--green); font-size: 18px; flex-shrink: 0; }
+.panel-head h3 { font-size: 15px; margin: 2px 0 4px; }
+.panel-head p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.steps { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); margin-bottom: 18px; background: white; border: 1px solid var(--line); border-radius: 14px; padding: 12px; }
+.step { display: flex; align-items: center; justify-content: center; gap: 9px; padding: 5px 7px; color: #7b879b; font-size: 11px; font-weight: 750; border-radius: 9px; }
+.step .num { width: 27px; height: 27px; display: grid; place-items: center; border-radius: 50%; background: #e8edf2; color: #66758c; flex-shrink: 0; }
+.step.active { color: var(--green-dark); background: #effcf4; }
+.step.active .num, .step.done .num { background: var(--green); color: white; }
+.grid-two { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
+.field-label { display: block; font-size: 12px; font-weight: 750; margin-bottom: 7px; }
+.field, select { width: 100%; border: 1px solid #d8e2eb; border-radius: 10px; background: #fbfdff; color: var(--ink); padding: 11px 12px; min-height: 43px; }
+.field:focus, select:focus { border-color: var(--green); outline: 3px solid rgba(7,136,79,.1); }
+.radio-row { display: flex; flex-wrap: wrap; gap: 18px; margin-bottom: 14px; font-size: 12px; }
+.radio-row label { display: flex; align-items: center; gap: 7px; }
+.radio-row input { accent-color: var(--green); }
+.choices { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 9px; }
+.choice { position: relative; text-align: left; border: 1px solid #dce5ed; border-radius: 11px; background: white; min-height: 61px; padding: 12px; color: var(--ink); font-size: 12px; font-weight: 700; line-height: 1.4; }
+.choice:hover { border-color: #75cda0; }
+.choice.selected { border: 1.5px solid var(--green); background: #e9fff2; box-shadow: 0 0 0 2px rgba(7,136,79,.07); }
+.choice.selected::after { content: "✓"; position: absolute; top: 8px; right: 9px; color: var(--green); font-weight: 900; }
+.notice { background: #f0f8f5; color: #315b50; border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; font-size: 12px; line-height: 1.5; }
+.category-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: end; margin-top: 13px; }
+.hint { color: var(--muted); font-size: 11px; line-height: 1.5; margin-top: 6px; }
+.member-entry { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 9px; }
+.member-list { display: grid; gap: 7px; margin-top: 12px; }
+.member-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid var(--line); border-radius: 9px; padding: 9px 11px; font-size: 12px; }
+.member-row button { border: 0; background: transparent; color: var(--danger); font-size: 11px; font-weight: 700; padding: 5px; }
+.member-empty { border: 1px dashed #d8e2eb; border-radius: 9px; padding: 15px; text-align: center; color: var(--muted); font-size: 12px; }
+.team-summary { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 9px; margin: 14px 0; }
+.summary-item { background: #f6f9fb; border: 1px solid #e6edf1; border-radius: 10px; padding: 10px; min-width: 0; }
+.summary-item small { display: block; color: var(--muted); font-size: 9px; font-weight: 800; margin-bottom: 5px; letter-spacing: .05em; }
+.summary-item strong { display: block; font-size: 11px; overflow-wrap: anywhere; line-height: 1.4; }
+.form-actions { display: flex; gap: 9px; margin-top: 16px; }
+.form-actions .primary { flex: 1; }
+.status { display: none; margin-top: 12px; padding: 11px 12px; border-radius: 9px; font-size: 12px; line-height: 1.5; }
+.status.show { display: block; }
+.status.ok { background: #e5f9ed; color: #087346; }
+.status.err { background: #fff0f0; color: var(--danger); }
+.teams-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.teams-head h3 { margin: 0; font-size: 15px; }
+.teams-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; margin-top: 14px; }
+.team-card { border: 1px solid var(--line); border-left: 4px solid var(--green); border-radius: 11px; padding: 13px; min-width: 0; }
+.team-card h4 { font-size: 12px; margin: 0 0 8px; overflow-wrap: anywhere; }
+.pills { display: flex; flex-wrap: wrap; gap: 5px; }
+.pill { background: #e5faee; color: #087346; border-radius: 6px; padding: 4px 7px; font-size: 10px; }
+.pill.game { background: #e8f2ff; color: #225ac0; }
+.pill.cat { background: #fff0df; color: #9b4d00; }
+.team-card ol { margin: 9px 0 0; padding-left: 18px; font-size: 11px; line-height: 1.7; }
+.team-actions { display:flex; flex-wrap:wrap; gap:7px; margin-top:12px; }
+.btn.small { padding:7px 10px; font-size:11px; }
+.btn.danger { color:var(--danger); border-color:#f0c8c8; background:#fff8f8; }
+.edit-dialog { width:min(620px,calc(100% - 28px)); max-height:90vh; overflow:auto; border:1px solid var(--line); border-radius:16px; padding:22px; box-shadow:0 24px 70px rgba(10,30,50,.25); color:var(--ink); }
+.edit-dialog::backdrop { background:rgba(7,24,36,.55); }
+.edit-dialog h3 { margin:0 0 6px; font-size:18px; }
+.edit-dialog .edit-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:13px; margin-top:18px; }
+.edit-dialog .edit-field.full { grid-column:1/-1; }
+.edit-dialog textarea { min-height:100px; resize:vertical; }
+.edit-dialog .form-actions { justify-content:flex-end; }
+.edit-dialog .form-actions .primary { flex:0 0 auto; }
+@media(max-width:560px){.edit-dialog .edit-grid{grid-template-columns:1fr}.edit-dialog .edit-field.full{grid-column:auto}}
+.empty { grid-column: 1/-1; border: 1px dashed #d8e2eb; border-radius: 11px; padding: 24px; text-align: center; color: var(--muted); font-size: 12px; }
+.hidden { display: none !important; }
+.view-tabs { display: flex; gap: 8px; margin-bottom: 15px; }
+.view-tabs button { border: 1px solid var(--line); border-radius: 9px; padding: 9px 13px; background: white; color: var(--ink); font-size: 12px; font-weight: 750; }
+.view-tabs button.active { background: var(--mint); border-color: #75cda0; color: #075b40; }
+.search-field { margin-bottom: 15px; }
+.table-wrap { overflow: auto; border: 1px solid var(--line); border-radius: 11px; }
+table { border-collapse: collapse; width: 100%; min-width: 740px; font-size: 11px; }
+th, td { padding: 11px 12px; border-bottom: 1px solid #eef3f6; text-align: left; }
+th { background: #f6f9fb; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; font-size: 10px; position: sticky; top: 0; }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover { background: #f3fbf7; }
+td:first-child { font-weight: 700; }
+.preview-stats { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 10px; margin-bottom: 15px; }
+.preview-stat { border: 1px solid var(--line); border-radius: 11px; background: white; padding: 12px; }
+.preview-stat small { display: block; color: var(--muted); font-size: 9px; font-weight: 800; margin-bottom: 5px; }
+.preview-stat strong { font-size: 20px; }
+@media(max-width:1050px) {
+  .app { grid-template-columns: 205px minmax(0,1fr); }
+  .content { padding: 20px; }
+  .choices { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .teams-list { grid-template-columns: 1fr; }
+}
+@media(max-width:760px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .topbar { padding: 15px 16px; }
+  .content { padding: 15px 12px 28px; }
+  .intro { align-items: flex-start; flex-direction: column; }
+  .intro .btn { width: 100%; }
+  .grid-two { grid-template-columns: 1fr; }
+  .stats { gap: 8px; }
+  .stat { padding: 11px; gap: 8px; }
+  .stat-icon { width: 32px; height: 32px; font-size: 15px; }
+  .stat strong { font-size: 21px; }
+  .stat small { font-size: 9px; }
+  .panel { padding: 15px; }
+  .steps { padding: 7px; }
+  .step { flex-direction: column; gap: 4px; font-size: 10px; text-align: center; }
+  .category-row { grid-template-columns: 1fr; }
+  .team-summary { grid-template-columns: 1fr; }
+  .preview-stats { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:430px) {
+  .choices { grid-template-columns: 1fr; }
+  .member-entry { grid-template-columns: 1fr; }
+  .form-actions { flex-direction: column-reverse; }
+  .form-actions .btn { width: 100%; }
+  .admin span { display: none; }
+  .steps { gap: 2px; }
+  .step { padding: 5px 2px; }
+}
+
+#appContent[hidden], #firebaseLogin[hidden] { display:none!important; }
+#firebaseLogin{min-height:100vh;display:grid;place-items:center;padding:24px;background:#f3f8f8}
+.login-card{width:min(420px,100%);background:#fff;border:1px solid #e1e9ee;border-radius:18px;padding:28px;box-shadow:0 12px 40px rgba(16,44,66,.10)}
+.login-card h1{margin:0 0 8px;font-size:23px}.login-card p{color:#6b7b98;font-size:13px;line-height:1.5}
+.login-card label{display:block;font-size:12px;font-weight:750;margin:14px 0 6px}
+.login-card input{width:100%;padding:12px;border:1px solid #d8e2eb;border-radius:10px}
+.login-card button{margin-top:16px;width:100%;padding:12px;border:0;border-radius:10px;background:#07884f;color:white;font-weight:750}
+#firebaseAuthMessage{color:#b42318;overflow-wrap:anywhere}
+.staff-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.staff-table{width:100%;border-collapse:collapse;font-size:12px}
+.staff-table th,.staff-table td{padding:11px 9px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+.staff-table th{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em}
+.staff-status{display:inline-block;padding:4px 8px;border-radius:99px;background:#dcfce9;color:#166534;font-weight:750;font-size:10px}
+.staff-status.inactive{background:#fee2e2;color:#991b1b}
+@media(max-width:650px){.staff-grid{grid-template-columns:1fr}.staff-table{min-width:560px}}
+</style>
+</head>
+<body>
+<section id="firebaseLogin">
+  <div class="login-card">
+    <h1>RoboZ Participant Management</h1>
+    <p>Sign in with your Firebase account. Only the administrator and approved staff can access participant records.</p>
+    <label for="firebaseEmail">Email</label>
+    <input id="firebaseEmail" type="email" autocomplete="username" required>
+    <label for="firebasePassword">Password</label>
+    <input id="firebasePassword" type="password" autocomplete="current-password" required>
+    <button id="firebaseLoginButton" type="button">Sign in</button>
+    <button id="firebaseLogoutButton" type="button" hidden>Sign out</button>
+    <p id="firebaseAuthMessage" role="status"></p>
+  </div>
+</section>
+<div class="app" id="appContent" hidden>
+  <aside class="sidebar" aria-label="Main navigation">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">RC</div>
+      <div><strong>Robotics Competition</strong><small>Participant Management</small></div>
+    </div>
+    <nav class="nav">
+      <button type="button" class="active" data-view="add"><span class="nav-icon" aria-hidden="true">＋</span><span>Add Participants</span></button>
+      <button type="button" data-view="preview"><span class="nav-icon" aria-hidden="true">▤</span><span>Data Preview</span></button>
+      <button type="button" data-view="staff" id="staffNavButton" hidden><span class="nav-icon" aria-hidden="true">♙</span><span>Manage Staff</span></button>
+    </nav>
+    <div class="sidebar-note">School-first registration<br>Teams · Divisions · Games</div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">Competition administration</div>
+        <h1 id="pageTitle">Participant Registration</h1>
+        <div class="top-sub" id="pageSub">Register a school team in a few clear steps.</div>
+      </div>
+      <div class="admin"><div class="avatar" aria-hidden="true">AD</div><span>Admin</span><button type="button" class="btn" id="topbarLogoutButton" aria-label="Sign out of RoboZ Participant Management">Log out</button></div>
+    </header>
+
+    <div class="content">
+      <div class="intro" id="intro">
+        <div><h2>Register your competition team</h2><p>Start with the school, choose the division and game, then add your participants. Your selections will be summarized before registration.</p></div>
+        <button class="btn" type="button" id="goPreview">View all participants ↗</button>
+      </div>
+
+      <section class="stats" aria-label="Registration overview">
+        <div class="stat"><div class="stat-icon" aria-hidden="true">♙</div><div><small>Total participants</small><strong id="statParticipants">0</strong></div></div>
+        <div class="stat"><div class="stat-icon" aria-hidden="true">▦</div><div><small>Teams registered</small><strong id="statTeams">0</strong></div></div>
+        <div class="stat"><div class="stat-icon" aria-hidden="true">⌂</div><div><small>Schools represented</small><strong id="statSchools">0</strong></div></div>
+      </section>
+
+      <div class="view-tabs" aria-label="Registration views">
+        <button type="button" class="active" data-view="add">Add Participants</button>
+        <button type="button" data-view="preview">Data Preview</button>
+      </div>
+
+      <section id="viewAdd">
+        <div class="steps" aria-label="Registration steps">
+          <div class="step active" data-step="1"><span class="num">1</span><span>School</span></div>
+          <div class="step" data-step="2"><span class="num">2</span><span>Division</span></div>
+          <div class="step" data-step="3"><span class="num">3</span><span>Game</span></div>
+          <div class="step" data-step="4"><span class="num">4</span><span>Participants</span></div>
+        </div>
+
+        <section class="panel">
+          <div class="panel-head"><div class="panel-icon" aria-hidden="true">⌂</div><div><h3>1. School information</h3><p>Select an existing school or add a new school. All participants in this team will be registered under it.</p></div></div>
+          <div class="radio-row">
+            <label><input type="radio" name="schoolMode" value="existing" checked> Existing school</label>
+            <label><input type="radio" name="schoolMode" value="new"> Add a new school</label>
+          </div>
+          <div id="existingSchoolWrap"><label class="field-label" for="schoolSelect">School</label><select id="schoolSelect"><option value="">Choose a school...</option></select></div>
+          <div id="newSchoolWrap" class="hidden"><label class="field-label" for="newSchool">Official school name</label><input id="newSchool" class="field" placeholder="Enter the official school name" autocomplete="organization" aria-describedby="schoolValidation"><div id="schoolValidation" class="hint" role="status" aria-live="polite">Enter the official school name. Existing school names cannot be added again.</div></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head"><div class="panel-icon" aria-hidden="true">♧</div><div><h3>2. Choose a division</h3><p>Available competition games will update based on your selection.</p></div></div>
+          <div class="choices" id="divisionChoices">
+            <button type="button" class="choice" data-division="Lower">Lower Division</button>
+            <button type="button" class="choice" data-division="Upper">Upper Division</button>
+            <button type="button" class="choice" data-division="Mentor">Mentor / Professional Division</button>
+            <button type="button" class="choice" data-division="Open">Open Division</button>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head"><div class="panel-icon" aria-hidden="true">⚙</div><div><h3>3. Choose a competition game</h3><p>Only games available in the selected division are shown.</p></div></div>
+          <div class="notice" id="gameNotice" role="status">Choose a division to see the available games.</div>
+          <div class="choices" id="gameChoices"></div>
+          <div id="categoryWrap" class="category-row hidden">
+            <div><div class="field-label">Zumobot category <span style="color:#b45309">(required)</span></div><div class="hint">Select the correct category for this team.</div></div>
+            <div><label class="field-label" for="categorySelect">Category</label><select id="categorySelect"><option value="">Choose a category...</option></select></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head"><div class="panel-icon" aria-hidden="true">♙</div><div><h3>4. Add team participants</h3><p>Add one participant at a time. The participant limit depends on the selected game.</p></div></div>
+          <div class="team-summary" aria-label="Team summary">
+            <div class="summary-item"><small>SCHOOL</small><strong id="summarySchool">Not selected</strong></div>
+            <div class="summary-item"><small>DIVISION</small><strong id="summaryDivision">Not selected</strong></div>
+            <div class="summary-item"><small>GAME / CATEGORY</small><strong id="summaryGame">Not selected</strong></div>
+          </div>
+          <label class="field-label" for="participantName">Participant full name</label>
+          <div class="member-entry"><input id="participantName" class="field" placeholder="Enter participant full name" autocomplete="off" disabled><button class="btn" id="addMemberBtn" type="button" disabled>Add member</button></div>
+          <div class="hint" id="memberLimitHint">Choose a game before adding participants.</div>
+          <div id="memberList" class="member-list"><div class="member-empty">No participants added yet.</div></div>
+          <div class="form-actions"><button class="btn" id="clearBtn" type="button">Clear form</button><button class="btn primary" id="addBtn" type="button">Register team</button></div>
+          <div id="status" class="status" role="status" aria-live="polite"></div>
+        </section>
+      </section>
+
+      <section id="viewPreview" class="hidden">
+        <div class="preview-stats">
+          <div class="preview-stat"><small>PARTICIPANTS</small><strong id="previewParticipants">0</strong></div>
+          <div class="preview-stat"><small>TEAMS</small><strong id="previewTeams">0</strong></div>
+          <div class="preview-stat"><small>SCHOOLS</small><strong id="previewSchools">0</strong></div>
+          <div class="preview-stat"><small>RESULTS SHOWN</small><strong id="previewShowing">0</strong></div>
+        </div>
+        <section class="panel">
+          <div class="panel-head"><div class="panel-icon" aria-hidden="true">▤</div><div><h3>Participant records</h3><p>Search registered participants by name, school, division, game, category, or team.</p></div></div>
+          <div class="search-field"><label class="field-label" for="previewSearch">Search records</label><input id="previewSearch" class="field" type="search" placeholder="Start typing to search..." autocomplete="off"></div>
+          <div class="grid-two" style="margin-bottom:14px">
+            <div><label class="field-label" for="filterBy">Add a filter</label><select id="filterBy"><option value="">Choose a field...</option><option value="school">School</option><option value="division">Division</option><option value="game">Game</option><option value="category">Category</option></select></div>
+            <div id="filterValueWrap" class="hidden"><label class="field-label" for="filterValue" id="filterValueLabel">Filter value</label><select id="filterValue" class="field"><option value="">Choose a value...</option></select></div>
+          </div>
+          <div id="activeFilters" class="hint" style="margin:0 0 12px"></div>
+          <div class="form-actions" style="margin:0 0 14px"><button class="btn" id="clearFilters" type="button">Clear search and filters</button></div>
+          <div class="table-wrap"><table><thead><tr><th>#</th><th>Participant</th><th>Game Code</th><th>School</th><th>Division</th><th>Game</th><th>Category</th><th>Team</th></tr></thead><tbody id="previewBody"></tbody></table></div>
+          <div class="empty" id="previewEmpty">No participants registered yet. Add a team to see records here.</div>
+        </section>
+      <section class="panel" id="importPanel">
+        <div class="panel-head"><div class="panel-icon" aria-hidden="true">⇧</div><div><h3>Import participants from Excel</h3><p>Upload an .xlsx, .xls, or .csv file to read participant records into this website. Review the detected data before importing.</p></div></div>
+        <label class="field-label" for="excelFile">Choose Excel or CSV file</label>
+        <input id="excelFile" class="field" type="file" accept=".xlsx,.xls,.csv">
+        <div class="hint">Recommended columns: Participant, School, Division, Game, Category, Team, Game Code. Column names can vary slightly. The first worksheet will be read.</div>
+        <div id="importFileStatus" class="status" role="status" aria-live="polite"></div>
+        <div id="importPreviewWrap" class="hidden" style="margin-top:14px">
+          <div class="teams-head"><h3 id="importPreviewTitle">Import preview</h3><span class="hint" id="importPreviewHint"></span></div>
+          <div class="table-wrap" style="margin-top:10px"><table><thead><tr><th>Participant</th><th>Game Code</th><th>School</th><th>Division</th><th>Game</th><th>Category</th><th>Team</th></tr></thead><tbody id="importPreviewBody"></tbody></table></div>
+          <div class="form-actions"><button class="btn" type="button" id="cancelImportBtn">Cancel import</button><button class="btn primary" type="button" id="confirmImportBtn">Import records</button></div>
+        </div>
+      </section>
+      </section>
+
+      <section class="panel" id="teamsPanel">
+        <div class="teams-head"><div><h3>Recently registered teams</h3><div class="top-sub">Edit a team to update its school, division, game, category, or participants. Delete a team to remove its participant records.</div></div><button class="btn" type="button" id="toggleTeams" aria-expanded="true">Hide list</button></div>
+        <div id="teamsList" class="teams-list"><div class="empty">No teams registered yet. Your registered teams will appear here.</div></div>
+      </section>
+
+      <section id="viewStaff" class="hidden">
+        <section class="panel">
+          <div class="panel-head"><div class="panel-icon" aria-hidden="true">♙</div><div><h3>Manage staff access</h3><p>Only the administrator can add staff accounts or deactivate their access. Staff can manage participant records but cannot manage other staff.</p></div></div>
+          <div class="staff-grid">
+            <div>
+              <label class="field-label" for="newStaffEmail">Staff email address</label>
+              <input id="newStaffEmail" class="field" type="email" autocomplete="off" placeholder="staff@example.com" required>
+              <p class="hint">A Firebase account will be created and a password-reset email will be sent so the staff member can set their own password.</p>
+              <button type="button" class="btn primary" id="addStaffButton">Add staff and send setup email</button>
+            </div>
+            <div>
+              <p class="hint">Removing access sets the staff account to inactive in Firestore. It does not delete their Firebase Authentication account or participant records.</p>
+              <button type="button" class="btn" id="refreshStaffButton">Refresh staff list</button>
+            </div>
+          </div>
+          <div id="staffStatus" class="status" role="status" aria-live="polite"></div>
+        </section>
+        <section class="panel">
+          <div class="teams-head"><div><h3>Staff accounts</h3><div class="top-sub">Active staff can sign in. Inactive staff will be denied access on their next authorization check.</div></div></div>
+          <div class="table-wrap"><table class="staff-table"><thead><tr><th>Email</th><th>UID</th><th>Status</th><th>Action</th></tr></thead><tbody id="staffTableBody"><tr><td colspan="4">Load the staff list to view accounts.</td></tr></tbody></table></div>
+        </section>
+      </section>
+
+      <p class="hint">Participant records are stored in Firebase Cloud Firestore and load when you sign in.</p>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<dialog id="teamEditDialog" class="edit-dialog" aria-labelledby="teamEditTitle">
+  <h3 id="teamEditTitle">Edit registered team</h3>
+  <p class="top-sub">Update the team details or participant names. Game codes will be recalculated when you save.</p>
+  <form id="teamEditForm">
+    <div class="edit-grid">
+      <div class="edit-field full"><label class="field-label" for="editSchool">School</label><input class="field" id="editSchool" required maxlength="180"></div>
+      <div class="edit-field"><label class="field-label" for="editDivision">Division</label><select id="editDivision" required class="field"><option>Lower</option><option>Upper</option><option>Mentor</option><option>Open</option></select></div>
+      <div class="edit-field"><label class="field-label" for="editGame">Game</label><select id="editGame" required class="field"></select></div>
+      <div class="edit-field full hidden" id="editCategoryWrap"><label class="field-label" for="editCategory">Zumobot category</label><select id="editCategory" class="field"></select></div>
+      <div class="edit-field full"><label class="field-label" for="editNames">Participant names (one per line)</label><textarea id="editNames" class="field" required></textarea><div class="hint" id="editMemberHint">Enter each participant on a separate line.</div></div>
+    </div>
+    <div id="editTeamStatus" class="status" role="status" aria-live="polite"></div>
+    <div class="form-actions"><button type="button" class="btn" id="cancelTeamEdit">Cancel</button><button type="submit" class="btn primary">Save changes</button></div>
+  </form>
+</dialog>
+
+<script>
+"use strict";
+const firebaseConfig = {
+  apiKey: "AIzaSyBkfApT_JC5tP76FlXHV-jqS0x7lwEvmmw",
+  authDomain: "roboz-participant-management.firebaseapp.com",
+  projectId: "roboz-participant-management",
+  storageBucket: "roboz-participant-management.firebasestorage.app",
+  messagingSenderId: "210193523600",
+  appId: "1:210193523600:web:fa0fe241887791835d8915"
+};
+const ADMIN_UID = "S0URKSpcOmNaK7w8WSVFrLlfnUD2";
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+// A secondary Auth instance creates staff accounts without signing the administrator out.
+const staffApp = firebase.initializeApp(firebaseConfig, "RoboZStaffAccountCreator");
+const staffAuth = staffApp.auth();
+let currentAdmin = null;
+let staffAccessUnsubscribe = null;
+const isAdminUser = user => !!user && user.uid === ADMIN_UID;
+
+const gamesByDivision = {
+  Lower: ["Zumobot","Sumo Blockly League","PLT-Beginner","Z-Puck Tri-Bot Hockey","maZe Robot","AERO Z- Drone Soccer"],
+  Upper: ["Sumo Blockly League","PLT-Advance","Mission Challenge: The ArcherZ' Circuit","Z-Puck Tri-Bot Hockey","AERO Z- Drone Soccer","Zumobot"],
+  Mentor: ["Zumobot"],
+  Open: ["Z-Cup Championship Main Event Mayhem"]
+};
+const $ = id => document.getElementById(id);
+let division = "", game = "", teams = [], schools = [], currentMembers = [];
+let activeFilter = {key:"",value:""}, searchQuery = "";
+const fields = {school:"School",division:"Division",game:"Game",category:"Category"};
+const clean = value => value.trim().replace(/\s+/g," ");
+function currentSchool() {
+  return document.querySelector('input[name="schoolMode"]:checked').value === "new" ? clean($("newSchool").value) : $("schoolSelect").value;
+}
+function showStatus(message,type="err") {
+  const el=$("status"); el.textContent=message; el.className="status show "+type;
+}
+function clearStatus() { $("status").textContent=""; $("status").className="status"; }
+function memberLimit() { return game === "Z-Puck Tri-Bot Hockey" ? 3 : 2; }
+function needsZumobotCategory() { return game==="Zumobot" && ["Lower","Upper","Mentor"].includes(division); }
+
+// Exact prefixes supplied for each Division + Game/Zumobot Category combination.
+const codePrefixes = {
+  Lower: {
+    "500g Auto":"L500A", "500g RC":"L500RC", "1KG Auto":"L1KGA", "1KG RC":"L1KGRC",
+    "Sumo Blockly League":"LBL", "PLT-Beginner":"LPLT", "Z-Puck Tri-Bot Hockey":"LTBH",
+    "maZe Robot":"LMAZE", "AERO Z- Drone Soccer":"LAZ"
+  },
+  Upper: {
+    "500g Auto":"U5GA", "500g RC":"U5RC", "1KG Auto":"U1KGA", "1KG RC":"U1KGRC",
+    "3KG Auto":"U3KGA", "5KG Auto":"U5KGA", "3KG RC":"U3KGRC", "5KG RC":"U5KGRC",
+    "Sumo Blockly League":"UBL", "PLT-Advance":"UPLT",
+    "Mission Challenge: The ArcherZ' Circuit":"UMC", "Z-Puck Tri-Bot Hockey":"UTBH",
+    "AERO Z- Drone Soccer":"UAZ"
+  },
+  Open: {"Z-Cup Championship Main Event Mayhem":"MAY"},
+  Mentor: {"3KG Auto":"M3KGA", "5KG Auto":"M5KGA", "3KG RC":"M3KGRC", "5KG RC":"M5KGRC"}
+};
+function effectiveGameKey(div, selectedGame, category) {
+  return selectedGame === "Zumobot" ? category : selectedGame;
+}
+function getCodePrefix(div, selectedGame, category) {
+  const key = effectiveGameKey(div, selectedGame, category);
+  return (codePrefixes[div] || {})[key] || "";
+}
+function nextParticipantCode(div, selectedGame, category) {
+  const key = effectiveGameKey(div, selectedGame, category);
+  const prefix = getCodePrefix(div, selectedGame, category);
+  if (!prefix) return "";
+  const sequenceKey = div + "|" + key;
+  const used = new Set(teams.flatMap(t => (t.codes || []).filter((code, i) => (t.codeKeys || [])[i] === sequenceKey)));
+  let number = 1;
+  let code = "";
+  do {
+    code = prefix + "-" + String(number).padStart(3, "0");
+    number++;
+  } while (used.has(code));
+  return code;
+}
+function updateSteps() {
+  const step = !currentSchool() ? 1 : !division ? 2 : !game ? 3 : 4;
+  document.querySelectorAll("[data-step]").forEach(el => {
+    const n=Number(el.dataset.step);
+    el.classList.toggle("active",n===step);
+    el.classList.toggle("done",n<step);
+    el.querySelector(".num").textContent=n<step?"✓":String(n);
+  });
+}
+function updateSummary() {
+  $("summarySchool").textContent=currentSchool()||"Not selected";
+  $("summaryDivision").textContent=division ? division+" Division" : "Not selected";
+  $("summaryGame").textContent=game ? game+(needsZumobotCategory() && $("categorySelect").value ? " · "+$("categorySelect").value : "") : "Not selected";
+  updateSteps();
+}
+function updateCategoryOptions() {
+  const select=$("categorySelect"), previous=select.value;
+  const options=division==="Lower" ? ["500g Auto","500g RC","1KG Auto","1KG RC"] : division==="Upper" ? ["500g Auto","500g RC","1KG Auto","1KG RC","3KG Auto","3KG RC","5KG Auto","5KG RC"] : division==="Mentor" ? ["3KG Auto","5KG Auto","3KG RC","5KG RC"] : [];
+  select.innerHTML='<option value="">Choose a category...</option>';
+  options.forEach(category=>{const o=document.createElement("option");o.value=category;o.textContent=category;select.appendChild(o);});
+  if(options.includes(previous)) select.value=previous;
+}
+function renderGames() {
+  const holder=$("gameChoices"); holder.replaceChildren();
+  (gamesByDivision[division]||[]).forEach(name=>{
+    const btn=document.createElement("button"); btn.type="button"; btn.className="choice"+(game===name?" selected":""); btn.textContent=name;
+    btn.setAttribute("aria-pressed",String(game===name));
+    btn.addEventListener("click",()=>{
+      if(game!==name) currentMembers=[];
+      game=name; updateCategoryOptions();
+      $("categoryWrap").classList.toggle("hidden",!needsZumobotCategory());
+      if(!needsZumobotCategory()) $("categorySelect").value="";
+      renderGames(); renderMembers(); updateSummary(); clearStatus();
+    });
+    holder.appendChild(btn);
+  });
+  $("categoryWrap").classList.toggle("hidden",!needsZumobotCategory());
+  $("gameNotice").textContent=!division ? "Choose a division to see the available games." : division==="Mentor" ? "Mentor / Professional Division: Zumobot is available." : division==="Open" ? "Open Division: Z-Cup Championship Main Event Mayhem is available." : "Choose one of the available games for this division.";
+}
+document.querySelectorAll("[data-division]").forEach(btn=>btn.addEventListener("click",()=>{
+  if(division!==btn.dataset.division){division=btn.dataset.division;game="";currentMembers=[];$("categorySelect").value="";}
+  document.querySelectorAll("[data-division]").forEach(b=>{b.classList.toggle("selected",b===btn);b.setAttribute("aria-pressed",String(b===btn));});
+  updateCategoryOptions();renderGames();renderMembers();updateSummary();clearStatus();
+}));
+function normalizeSchoolName(value) {
+  return clean(String(value || "")).toLocaleLowerCase();
+}
+function findExistingSchool(name) {
+  const normalized = normalizeSchoolName(name);
+  if (!normalized) return "";
+  return schools.find(s => normalizeSchoolName(s) === normalized) ||
+    (teams.find(t => normalizeSchoolName(t.school) === normalized) || {}).school || "";
+}
+function validateNewSchool(showEmpty=false) {
+  const input=$("newSchool"), message=$("schoolValidation");
+  const value=clean(input.value);
+  const existing=findExistingSchool(value);
+  const isNewMode=document.querySelector('input[name="schoolMode"]:checked').value==="new";
+  const duplicate=Boolean(isNewMode && value && existing);
+  input.setCustomValidity(duplicate ? "This school already exists. Select it from the existing school list instead." : "");
+  input.setAttribute("aria-invalid",String(duplicate));
+  if (duplicate) {
+    message.textContent=`"${existing}" already exists. Choose it from the existing school list; it cannot be added again.`;
+    message.style.color="#b42318";
+  } else if (!value && showEmpty && isNewMode) {
+    message.textContent="Enter the official school name.";
+    message.style.color="#b42318";
+  } else {
+    message.textContent="Enter the official school name. Existing school names cannot be added again.";
+    message.style.color="";
+  }
+  return !duplicate && (!showEmpty || !isNewMode || Boolean(value));
+}
+document.querySelectorAll('input[name="schoolMode"]').forEach(r=>r.addEventListener("change",()=>{
+  const isNew=r.checked&&r.value==="new";
+  $("newSchoolWrap").classList.toggle("hidden",!isNew);$("existingSchoolWrap").classList.toggle("hidden",isNew);
+  updateSummary();clearStatus();
+}));
+$("schoolSelect").addEventListener("change",()=>{updateSummary();clearStatus();});
+$("newSchool").addEventListener("input",()=>{validateNewSchool(false);updateSummary();clearStatus();});
+$("categorySelect").addEventListener("change",()=>{updateSummary();clearStatus();});
+function addSchool(name) {
+  const existing=findExistingSchool(name);
+  if(existing) return false;
+  schools.push(clean(name));
+  schools.sort((a,b)=>a.localeCompare(b));
+  const select=$("schoolSelect"), selected=select.value;
+  select.replaceChildren(new Option("Choose a school...",""));
+  schools.forEach(s=>select.add(new Option(s,s)));
+  if(selected) select.value=selected;
+  return true;
+}
+function renderMembers() {
+  const holder=$("memberList");holder.replaceChildren();
+  if(!currentMembers.length){const empty=document.createElement("div");empty.className="member-empty";empty.textContent="No participants added yet.";holder.appendChild(empty);}
+  currentMembers.forEach((name,index)=>{
+    const row=document.createElement("div");row.className="member-row";
+    const label=document.createElement("span");label.textContent=(index+1)+". "+name;
+    const remove=document.createElement("button");remove.type="button";remove.textContent="Remove";remove.setAttribute("aria-label","Remove "+name);
+    remove.addEventListener("click",()=>{currentMembers.splice(index,1);renderMembers();clearStatus();});
+    row.append(label,remove);holder.appendChild(row);
+  });
+  const max=memberLimit(), canAdd=Boolean(game)&&currentMembers.length<max;
+  $("memberLimitHint").textContent=!game?"Choose a game before adding participants.":`This game allows up to ${max} members. ${currentMembers.length} of ${max} added.`;
+  $("participantName").disabled=!canAdd;$("addMemberBtn").disabled=!canAdd;
+  $("addMemberBtn").textContent=currentMembers.length>=max?"Team full":"Add member";
+}
+$("addMemberBtn").addEventListener("click",()=>{
+  const name=clean($("participantName").value);
+  if(!game){showStatus("Choose a division and game first.");return;}
+  if(!name){showStatus("Enter a participant's full name.");$("participantName").focus();return;}
+  if(currentMembers.some(n=>n.toLowerCase()===name.toLowerCase())){showStatus("This participant is already in the current team.");return;}
+  if(currentMembers.length>=memberLimit()){showStatus(`This game allows up to ${memberLimit()} members.`);return;}
+  currentMembers.push(name);$("participantName").value="";renderMembers();clearStatus();$("participantName").focus();
+});
+$("participantName").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();$("addMemberBtn").click();}});
+function resetForm(keepSchool=true) {
+  $("participantName").value="";currentMembers=[];division="";game="";$("categorySelect").value="";
+  document.querySelectorAll("[data-division]").forEach(b=>{b.classList.remove("selected");b.setAttribute("aria-pressed","false");});
+  $("gameChoices").replaceChildren();$("categoryWrap").classList.add("hidden");
+  $("gameNotice").textContent="Choose a division to see the available games.";
+  if(!keepSchool){document.querySelector('input[name="schoolMode"][value="existing"]').checked=true;$("newSchoolWrap").classList.add("hidden");$("existingSchoolWrap").classList.remove("hidden");$("newSchool").value="";$("schoolSelect").value="";}
+  renderMembers();updateSummary();clearStatus();
+}
+$("clearBtn").addEventListener("click",()=>resetForm(true));
+$("addBtn").addEventListener("click",async ()=>{
+  const school=currentSchool(), category=$("categorySelect").value;
+  const isNewSchool=document.querySelector('input[name="schoolMode"]:checked').value==="new";
+  if(isNewSchool && !validateNewSchool(true)) { showStatus("Enter a new school name that does not already exist."); $("newSchool").focus(); return; }
+  if(!school){showStatus("Select an existing school or enter a new school name.");return;}
+  if(!division){showStatus("Select a division.");return;}
+  if(!game){showStatus("Select a competition game.");return;}
+  if(needsZumobotCategory()&&!category){showStatus("Choose a required Zumobot category.");return;}
+  if(!currentMembers.length){showStatus("Add at least one participant before registering the team.");return;}
+  const prefix=getCodePrefix(division,game,category);
+  if(!prefix){showStatus("A game-code prefix has not been configured for this division and game yet.");return;}
+  const duplicate=currentMembers.find(n=>teams.some(t=>t.names.some(existing=>existing.toLowerCase()===n.toLowerCase())));
+  if(duplicate){showStatus(`${duplicate} is already registered on another team in this session. Check the records before continuing.`);return;}
+  if(document.querySelector('input[name="schoolMode"]:checked').value==="new")addSchool(school);
+  const teamNo=teams.filter(t=>t.school.toLowerCase()===school.toLowerCase()&&t.division===division&&t.game===game&&t.category===category).length+1;
+  const codeKey=division+"|"+effectiveGameKey(division,game,category);
+  // Generate codes in order, continuing the correct Division + Game/Category sequence.
+  const reserved = new Set(teams.flatMap(t=>t.codes||[]));
+  const prefixForTeam = prefix + "-";
+  const assignedCodes = currentMembers.map(() => {
+    let number = 1, candidate;
+    do {
+      candidate = prefixForTeam + String(number).padStart(3,"0");
+      number++;
+    } while (reserved.has(candidate));
+    reserved.add(candidate);
+    return candidate;
+  });
+  try {
+    const teamData={school,division,game,category,names:[...currentMembers],codes:assignedCodes,
+      codeKeys:currentMembers.map(()=>codeKey),teamNo,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+      createdBy:currentAdmin.uid};
+    const saved=await db.collection("teams").add(teamData);
+    teams.unshift({...teamData,id:saved.id,createdAt:new Date().toISOString()});
+    renderTeams();renderPreview();updateStats();
+    showStatus(`Team ${teamNo} registered for ${school} and saved to Firebase.`,"ok");
+    resetForm(true);
+  } catch(error) {
+    console.error(error);
+    showStatus("Could not save to Firebase: "+error.message);
+  }
+});
+function renderTeams() {
+  const holder=$("teamsList");holder.replaceChildren();
+  if(!teams.length){const empty=document.createElement("div");empty.className="empty";empty.textContent="No teams registered yet. Your registered teams will appear here.";holder.appendChild(empty);return;}
+  teams.forEach(t=>{
+    const card=document.createElement("article");card.className="team-card";
+    const title=document.createElement("h4");title.textContent=t.school+" — Team "+t.teamNo;card.appendChild(title);
+    const pills=document.createElement("div");pills.className="pills";
+    [[t.division+" Division",""],[t.game,"game"],...(t.category?[[t.category,"cat"]]:[])].forEach(([text,cls])=>{const p=document.createElement("span");p.className="pill "+cls;p.textContent=text;pills.appendChild(p);});
+    card.appendChild(pills);
+    const list=document.createElement("ol");t.names.forEach((n,i)=>{const li=document.createElement("li");li.textContent=n+(t.codes&&t.codes[i]?" — "+t.codes[i]:"");list.appendChild(li);});card.appendChild(list);
+    const actions=document.createElement("div");actions.className="team-actions";
+    const edit=document.createElement("button");edit.type="button";edit.className="btn small";edit.textContent="Edit team";edit.setAttribute("aria-label",`Edit Team ${t.teamNo} from ${t.school}`);edit.addEventListener("click",()=>openTeamEditor(t.id));
+    const del=document.createElement("button");del.type="button";del.className="btn small danger";del.textContent="Delete team";del.setAttribute("aria-label",`Delete Team ${t.teamNo} from ${t.school}`);del.addEventListener("click",()=>deleteTeam(t.id));
+    actions.append(edit,del);card.appendChild(actions);
+    holder.appendChild(card);
+  });
+}
+function editCategoryOptions() {
+  const div=$("editDivision").value;
+  const options=div==="Lower"?["500g Auto","500g RC","1KG Auto","1KG RC"]:div==="Upper"?["500g Auto","500g RC","1KG Auto","1KG RC","3KG Auto","3KG RC","5KG Auto","5KG RC"]:div==="Mentor"?["3KG Auto","5KG Auto","3KG RC","5KG RC"]:[];
+  const select=$("editCategory"), old=select.value;select.replaceChildren(new Option("Choose a category...",""));
+  options.forEach(v=>select.add(new Option(v,v)));if(options.includes(old))select.value=old;
+  $("editCategoryWrap").classList.toggle("hidden",!($("editGame").value==="Zumobot"&&div!=="Open"));
+}
+function editGameOptions(selected="") {
+  const div=$("editDivision").value, select=$("editGame");select.replaceChildren(new Option("Choose a game...",""));
+  (gamesByDivision[div]||[]).forEach(v=>select.add(new Option(v,v)));
+  if((gamesByDivision[div]||[]).includes(selected))select.value=selected;
+  else if(selected)select.value="";
+  editCategoryOptions();
+}
+$("editDivision").addEventListener("change",()=>editGameOptions());
+$("editGame").addEventListener("change",editCategoryOptions);
+function openTeamEditor(id) {
+  const t=teams.find(item=>item.id===id);if(!t)return;
+  $("teamEditForm").dataset.teamId=String(id);
+  $("editSchool").value=t.school;$("editDivision").value=t.division;editGameOptions(t.game);
+  $("editCategory").value=t.category||"";editCategoryOptions();$("editCategory").value=t.category||"";
+  $("editNames").value=t.names.join("\n");$("editMemberHint").textContent=`Maximum ${t.game==="Z-Puck Tri-Bot Hockey"?3:2} participants for this game.`;
+  $("editTeamStatus").textContent="";$("editTeamStatus").className="status";
+  $("teamEditDialog").showModal();
+}
+function renumberTeams() {
+  const counts=new Map();
+  [...teams].reverse().forEach(t=>{const key=[normalizeSchoolName(t.school),t.division,t.game,t.category||""].join("|");const n=(counts.get(key)||0)+1;counts.set(key,n);t.teamNo=n;});
+}
+async function deleteTeam(id) {
+  const t=teams.find(item=>item.id===id);if(!t)return;
+  if(!window.confirm(`Delete Team ${t.teamNo} from ${t.school}? This removes ${t.names.length} participant record(s) from this session.`))return;
+  try {
+    await db.collection("teams").doc(String(id)).delete();
+    teams=teams.filter(item=>item.id!==id);renumberTeams();renderTeams();renderPreview();updateStats();
+  } catch(error) {
+    console.error(error);alert("Could not delete the team from Firebase: "+error.message);
+  }
+}
+function setEditError(message) { $("editTeamStatus").textContent=message;$("editTeamStatus").className="status show err"; }
+$("cancelTeamEdit").addEventListener("click",()=>$("teamEditDialog").close());
+$("teamEditForm").addEventListener("submit",async e=>{
+  e.preventDefault();const id=$("teamEditForm").dataset.teamId, t=teams.find(item=>String(item.id)===String(id));if(!t)return;
+  const school=clean($("editSchool").value), div=$("editDivision").value, selectedGame=$("editGame").value, category=$("editCategory").value;
+  const names=$("editNames").value.split(/\r?\n/).map(clean).filter(Boolean);
+  if(!school){setEditError("Enter the school name.");return;}
+  if(!selectedGame){setEditError("Choose a game.");return;}
+  if(selectedGame==="Zumobot"&&div!=="Open"&&!category){setEditError("Choose a Zumobot category.");return;}
+  if(!names.length){setEditError("Enter at least one participant name.");return;}
+  const max=selectedGame==="Z-Puck Tri-Bot Hockey"?3:2;if(names.length>max){setEditError(`This game allows up to ${max} participants per team.`);return;}
+  const unique=new Set();for(const name of names){const key=name.toLocaleLowerCase();if(unique.has(key)){setEditError(`"${name}" appears more than once on this team.`);return;}unique.add(key);}
+  const duplicate=names.find(name=>teams.some(other=>other.id!==id&&other.names.some(existing=>existing.toLocaleLowerCase()===name.toLocaleLowerCase())));
+  if(duplicate){setEditError(`"${duplicate}" is already registered on another team. Each participant can only be registered once.`);return;}
+  const prefix=getCodePrefix(div,selectedGame,category);if(!prefix){setEditError("A game-code prefix has not been configured for this selection.");return;}
+  const oldSchool=t.school;
+  const schoolAlreadyListed=schools.some(name=>normalizeSchoolName(name)===normalizeSchoolName(school)) || teams.some(other=>other.id!==id&&normalizeSchoolName(other.school)===normalizeSchoolName(school));
+  t.school=school;t.division=div;t.game=selectedGame;t.category=selectedGame==="Zumobot"?category:"";t.names=names;
+  const reserved=new Set(teams.filter(other=>other.id!==id).flatMap(other=>other.codes||[]));const codePrefix=prefix+"-";
+  t.codes=names.map(()=>{let n=1,candidate;do{candidate=codePrefix+String(n++).padStart(3,"0");}while(reserved.has(candidate));reserved.add(candidate);return candidate;});
+  const codeKey=div+"|"+effectiveGameKey(div,selectedGame,t.category);t.codeKeys=names.map(()=>codeKey);
+  try {
+    await db.collection("teams").doc(String(id)).update({
+      school:t.school,division:t.division,game:t.game,category:t.category,names:t.names,
+      codes:t.codes,codeKeys:t.codeKeys,updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+  } catch(error) {
+    console.error(error);setEditError("Could not save changes to Firebase: "+error.message);return;
+  }
+  if(!schoolAlreadyListed){schools.push(school);}
+  // Preserve the previous school in the selector if other records still use it; otherwise remove it from the options.
+  if(!teams.some(other=>normalizeSchoolName(other.school)===normalizeSchoolName(oldSchool)))schools=schools.filter(name=>normalizeSchoolName(name)!==normalizeSchoolName(oldSchool));
+  const selectedSchool=$("schoolSelect").value;const schoolSelect=$("schoolSelect");schoolSelect.replaceChildren(new Option("Choose a school...",""));schools.sort((a,b)=>a.localeCompare(b)).forEach(name=>schoolSelect.add(new Option(name,name)));if(selectedSchool)schoolSelect.value=selectedSchool;
+  renumberTeams();renderTeams();renderPreview();updateStats();$("teamEditDialog").close();
+});
+$("toggleTeams").addEventListener("click",()=>{
+  const list=$("teamsList"), hidden=!list.classList.contains("hidden");
+  list.classList.toggle("hidden",hidden);$("toggleTeams").textContent=hidden?"Show list":"Hide list";$("toggleTeams").setAttribute("aria-expanded",String(!hidden));
+});
+function setView(view) {
+  if(view === "staff" && !isAdminUser(currentAdmin)) return;
+  const preview=view==="preview", staff=view==="staff";
+  $("viewAdd").classList.toggle("hidden",preview||staff);
+  $("viewPreview").classList.toggle("hidden",!preview);
+  $("viewStaff").classList.toggle("hidden",!staff);
+  $("teamsPanel").classList.toggle("hidden",preview||staff);
+  $("intro").classList.toggle("hidden",preview||staff);
+  document.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===view));
+  $("pageTitle").textContent=preview?"Participant Data Preview":staff?"Manage Staff Access":"Participant Registration";
+  $("pageSub").textContent=preview?"Search and review registered participant records.":staff?"Add staff accounts or deactivate access.":"Register a school team in a few clear steps.";
+  if(preview)renderPreview();
+  if(staff)loadStaffList();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+document.querySelectorAll("[data-view]").forEach(b=>b.addEventListener("click",()=>setView(b.dataset.view)));
+$("goPreview").addEventListener("click",()=>setView("preview"));
+function previewRows() {
+  const rows=[];
+  [...teams].reverse().forEach(t=>t.names.forEach((n,i)=>rows.push({name:n,code:(t.codes||[])[i]||"—",school:t.school,division:t.division+" Division",game:t.game,category:t.category||"—",team:"Team "+t.teamNo})));
+  return rows;
+}
+function filteredRows() {
+  let rows=previewRows();
+  const q=searchQuery.toLowerCase();
+  if(q) rows=rows.filter(r=>[r.name,r.school,r.division,r.game,r.category,r.team].some(v=>v.toLowerCase().includes(q)));
+  if(activeFilter.key&&activeFilter.value) rows=rows.filter(r=>r[activeFilter.key]===activeFilter.value);
+  return rows;
+}
+function updateFilterOptions() {
+  const key=$("filterBy").value, wrap=$("filterValueWrap"), select=$("filterValue");
+  if(!key){wrap.classList.add("hidden");activeFilter={key:"",value:""};renderPreview();return;}
+  const values=[...new Set(previewRows().map(r=>r[key]))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+  select.replaceChildren(new Option("Choose a value...",""));
+  values.forEach(v=>select.add(new Option(v,v)));
+  wrap.classList.remove("hidden");$("filterValueLabel").textContent=fields[key];
+}
+$("filterBy").addEventListener("change",updateFilterOptions);
+$("filterValue").addEventListener("change",()=>{activeFilter={key:$("filterBy").value,value:$("filterValue").value};renderPreview();});
+function renderPreview() {
+  const all=previewRows(), rows=filteredRows(), body=$("previewBody");body.replaceChildren();
+  rows.forEach((r,i)=>{
+    const tr=document.createElement("tr");
+    [i+1,r.name,r.code,r.school,r.division,r.game,r.category,r.team].forEach((value,index)=>{const td=document.createElement("td");td.textContent=value;if(index===2)td.style.fontWeight="750";tr.appendChild(td);});
+    body.appendChild(tr);
+  });
+  $("previewParticipants").textContent=all.length;$("previewTeams").textContent=teams.length;$("previewSchools").textContent=new Set(teams.map(t=>t.school.toLowerCase())).size;$("previewShowing").textContent=rows.length;
+  $("previewEmpty").classList.toggle("hidden",rows.length>0);
+  $("previewEmpty").textContent=all.length?"No records match your search or filter.":"No participants registered yet. Add a team to see records here.";
+  $("activeFilters").textContent=activeFilter.key&&activeFilter.value?`${fields[activeFilter.key]}: ${activeFilter.value}`:"";
+}
+$("previewSearch").addEventListener("input",()=>{searchQuery=$("previewSearch").value.trim();renderPreview();});
+$("clearFilters").addEventListener("click",()=>{
+  searchQuery="";activeFilter={key:"",value:""};$("previewSearch").value="";$("filterBy").value="";$("filterValue").replaceChildren(new Option("Choose a value...",""));$("filterValueWrap").classList.add("hidden");renderPreview();
+});
+function updateStats() {
+  const rows=previewRows();
+  $("statParticipants").textContent=rows.length;
+  $("statTeams").textContent=teams.length;
+  $("statSchools").textContent=new Set(teams.map(t=>t.school.toLowerCase())).size;
+}
+// Excel/CSV import: uses SheetJS to read the first worksheet in the selected file.
+let pendingImportRows = [];
+function setImportStatus(message, type="err") {
+  const el=$("importFileStatus");el.textContent=message;el.className="status show "+type;
+}
+function clearImportPreview() {
+  pendingImportRows=[];
+  $("importPreviewWrap").classList.add("hidden");
+  $("importPreviewBody").replaceChildren();
+  $("excelFile").value="";
+}
+function normalizedHeader(value) {
+  return String(value||"").toLowerCase().replace(/[^a-z0-9]/g,"");
+}
+function getCell(row, aliases) {
+  const entries=Object.entries(row);
+  for(const alias of aliases) {
+    const key=normalizedHeader(alias);
+    const found=entries.find(([k,v])=>normalizedHeader(k)===key && String(v??"").trim()!=="");
+    if(found) return String(found[1]).trim();
+  }
+  return "";
+}
+function normalizeDivision(value) {
+  const v=String(value||"").trim().toLowerCase();
+  if(v==="lower"||v.includes("elementary")) return "Lower";
+  if(v==="upper") return "Upper";
+  if(v==="mentor"||v.includes("professional")) return "Mentor";
+  if(v==="open") return "Open";
+  return String(value||"").trim();
+}
+function canonicalGame(value) {
+  const raw=String(value||"").trim();
+  const match=Object.values(gamesByDivision).flat().find(g=>g.toLowerCase()===raw.toLowerCase());
+  return match || raw;
+}
+function parseImportedRow(row, index) {
+  const name=getCell(row,["Participant","Participant Name","Name","Full Name","Student"]);
+  const school=getCell(row,["School","School Name","Institution"]);
+  const divisionValue=normalizeDivision(getCell(row,["Division","Competition Division"]));
+  const gameValue=canonicalGame(getCell(row,["Game","Competition Game","Event"]));
+  const category=getCell(row,["Category","Game Category","Zumobot Category"]);
+  const teamValue=getCell(row,["Team","Team Number","Team Name","Team ID"]) || "Imported Team "+(index+1);
+  const code=getCell(row,["Game Code","Participant Code","Code","Registration Code"]);
+  return {name,school,division:divisionValue,game:gameValue,category,teamValue,code,sourceRow:index+2};
+}
+function importCodePrefix(record) {
+  const selectedGame=record.game==="Zumobot" ? "Zumobot" : record.game;
+  return getCodePrefix(record.division,selectedGame,record.category);
+}
+function previewImportRows(rows) {
+  const body=$("importPreviewBody");body.replaceChildren();
+  rows.slice(0,10).forEach(r=>{
+    const tr=document.createElement("tr");
+    [r.name||"—",r.code||"(auto-generate if supported)",r.school||"—",r.division||"—",r.game||"—",r.category||"—",r.teamValue||"—"].forEach(value=>{
+      const td=document.createElement("td");td.textContent=value;tr.appendChild(td);
+    });
+    body.appendChild(tr);
+  });
+  $("importPreviewTitle").textContent=`Import preview (${rows.length} row${rows.length===1?"":"s"})`;
+  $("importPreviewHint").textContent=rows.length>10?"Showing first 10 rows": "Review the detected columns before importing";
+  $("importPreviewWrap").classList.remove("hidden");
+}
+$("excelFile").addEventListener("change", async event=>{
+  const file=event.target.files && event.target.files[0];
+  if(!file) return;
+  if(!window.XLSX){setImportStatus("The Excel-reading library could not load. Check your internet connection and try again.", "err");return;}
+  try {
+    const buffer=await file.arrayBuffer();
+    const workbook=XLSX.read(buffer,{type:"array"});
+    const firstSheet=workbook.Sheets[workbook.SheetNames[0]];
+    const rawRows=XLSX.utils.sheet_to_json(firstSheet,{defval:"",raw:false});
+    if(!rawRows.length){setImportStatus("No data rows were found in the first worksheet.", "err");return;}
+    pendingImportRows=rawRows.map(parseImportedRow).filter(r=>r.name||r.school||r.game);
+    if(!pendingImportRows.length){setImportStatus("No recognizable participant records were found. Check the column headers and worksheet.", "err");return;}
+    const missing=pendingImportRows.filter(r=>!r.name||!r.school||!r.division||!r.game);
+    setImportStatus(`Read ${pendingImportRows.length} row(s) from "${file.name}". ${missing.length ? missing.length+" row(s) are missing required fields and will be skipped." : "Required fields were detected."}`,missing.length?"err":"ok");
+    previewImportRows(pendingImportRows);
+  } catch(error) {
+    console.error(error);
+    setImportStatus("The file could not be read. Use a valid .xlsx, .xls, or .csv file and try again.", "err");
+  }
+});
+$("cancelImportBtn").addEventListener("click",()=>{clearImportPreview();$("importFileStatus").className="status";$("importFileStatus").textContent="";});
+$("confirmImportBtn").addEventListener("click",async ()=>{
+  const valid=pendingImportRows.filter(r=>r.name&&r.school&&r.division&&r.game);
+  if(!valid.length){setImportStatus("No valid records to import. Ensure each row has Participant, School, Division, and Game.", "err");return;}
+  const errors=[];
+  const groups=new Map();
+  valid.forEach(r=>{
+    if(!(r.division in gamesByDivision)){errors.push(`Row ${r.sourceRow}: unknown division "${r.division}".`);return;}
+    const allowed=gamesByDivision[r.division]||[];
+    if(!allowed.includes(r.game)){errors.push(`Row ${r.sourceRow}: "${r.game}" is not listed for ${r.division} Division.`);return;}
+    if(r.game==="Zumobot"&&!r.category){errors.push(`Row ${r.sourceRow}: Zumobot requires a category.`);return;}
+    if(r.game==="Zumobot"&&!getCodePrefix(r.division,r.game,r.category)){errors.push(`Row ${r.sourceRow}: unsupported Zumobot category "${r.category}".`);return;}
+    if(r.game!=="Zumobot"&&!getCodePrefix(r.division,r.game,r.category)){errors.push(`Row ${r.sourceRow}: no game-code prefix is configured.`);return;}
+    const key=[r.school.toLowerCase(),r.division,r.game,r.category,r.teamValue].join("|");
+    if(!groups.has(key))groups.set(key,{school:r.school,division:r.division,game:r.game,category:r.category,names:[],providedCodes:[],sourceRows:[]});
+    const group=groups.get(key);
+    if(group.names.some(n=>n.toLowerCase()===r.name.toLowerCase())){errors.push(`Row ${r.sourceRow}: duplicate participant "${r.name}" within an imported team.`);return;}
+    group.names.push(r.name);group.providedCodes.push(r.code);group.sourceRows.push(r.sourceRow);
+  });
+  if(errors.length){setImportStatus("Import stopped because some rows need correction: "+errors.slice(0,4).join(" "), "err");return;}
+  const existingNames=new Set(teams.flatMap(t=>t.names.map(n=>n.toLowerCase())));
+  for(const group of groups.values()){
+    const duplicate=group.names.find(n=>existingNames.has(n.toLowerCase()));
+    if(duplicate){setImportStatus(`Import stopped: "${duplicate}" is already registered. Resolve duplicate participants before importing.`, "err");return;}
+    group.names.forEach(n=>existingNames.add(n.toLowerCase()));
+  }
+  const existingCodes=new Set(teams.flatMap(t=>t.codes||[]));
+  const importedCodes=valid.map(r=>r.code).filter(Boolean);
+  if(new Set(importedCodes).size!==importedCodes.length || importedCodes.some(c=>existingCodes.has(c))){
+    setImportStatus("Import stopped: the spreadsheet contains duplicate game codes or codes already in the current session.", "err");return;
+  }
+  for(const group of groups.values()){
+    const teamNo=teams.filter(t=>t.school.toLowerCase()===group.school.toLowerCase()&&t.division===group.division&&t.game===group.game&&t.category===group.category).length+1;
+    const codeKey=group.division+"|"+effectiveGameKey(group.division,group.game,group.category);
+    const prefix=getCodePrefix(group.division,group.game,group.category);
+    const reserved=new Set(teams.flatMap(t=>t.codes||[]));
+    const codes=group.names.map((name,i)=>{
+      const provided=group.providedCodes[i];
+      if(provided){reserved.add(provided);return provided;}
+      if(!prefix)return "—";
+      let n=1,candidate;
+      do{candidate=prefix+"-"+String(n++).padStart(3,"0");}while(reserved.has(candidate));
+      reserved.add(candidate);return candidate;
+    });
+    addSchool(group.school);
+    const data={school:group.school,division:group.division,game:group.game,category:group.category,
+      names:group.names,codes,codeKeys:group.names.map(()=>codeKey),teamNo,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp(),createdBy:currentAdmin.uid};
+    try {
+      const saved=await db.collection("teams").add(data);
+      teams.unshift({...data,id:saved.id,createdAt:new Date().toISOString()});
+    } catch(error) {
+      console.error(error);setImportStatus("Firebase import failed: "+error.message,"err");return;
+    }
+  }
+  renderTeams();renderPreview();updateStats();
+  setImportStatus(`Successfully imported ${valid.length} participant(s) across ${groups.size} team(s) to Firebase.`, "ok");
+  $("importPreviewWrap").classList.add("hidden");$("importPreviewBody").replaceChildren();pendingImportRows=[];$("excelFile").value="";
+});
+
+function init() {
+  updateSummary();renderMembers();renderTeams();renderPreview();updateStats();
+}
+// Staff management. Admin permissions are also enforced by Firestore rules.
+function setStaffStatus(message,type="err") {
+  const el=$("staffStatus"); el.textContent=message; el.className="status show "+type;
+}
+function safeText(value) { return String(value ?? ""); }
+async function loadStaffList() {
+  if(!isAdminUser(currentAdmin)) return;
+  const body=$("staffTableBody");
+  body.innerHTML='<tr><td colspan="4">Loading staff accounts…</td></tr>';
+  try {
+    const snap=await db.collection("userAccess").get();
+    const docs=snap.docs.filter(doc=>doc.id!==ADMIN_UID).sort((a,b)=>safeText(a.data().email).localeCompare(safeText(b.data().email)));
+    body.replaceChildren();
+    if(!docs.length) {
+      const tr=document.createElement("tr"), td=document.createElement("td"); td.colSpan=4; td.textContent="No staff access records found."; tr.appendChild(td); body.appendChild(tr); return;
+    }
+    docs.forEach(doc=>{
+      const data=doc.data(), active=data.active===true, tr=document.createElement("tr");
+      const email=document.createElement("td"); email.textContent=data.email||"Email not recorded";
+      const uid=document.createElement("td"); uid.textContent=doc.id;
+      const status=document.createElement("td"), badge=document.createElement("span"); badge.className="staff-status"+(active?"":" inactive"); badge.textContent=active?"Active":"Inactive"; status.appendChild(badge);
+      const action=document.createElement("td"), button=document.createElement("button"); button.type="button"; button.className="btn small"; button.textContent=active?"Remove access":"Restore access";
+      button.addEventListener("click",async()=>{
+        if(!isAdminUser(currentAdmin)) return;
+        const verb=active?"remove access for":"restore access for";
+        if(!confirm(`Are you sure you want to ${verb} ${data.email||doc.id}?`)) return;
+        button.disabled=true;
+        try {
+          await db.collection("userAccess").doc(doc.id).set({active:!active,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedBy:currentAdmin.uid},{merge:true});
+          setStaffStatus(active?"Staff access has been deactivated.":"Staff access has been restored.","ok");
+          await loadStaffList();
+        } catch(error) { setStaffStatus("Could not update staff access: "+error.message); button.disabled=false; }
+      });
+      action.appendChild(button); tr.append(email,uid,status,action); body.appendChild(tr);
+    });
+  } catch(error) {
+    console.error("Could not load staff list:",error);
+    body.innerHTML='<tr><td colspan="4">Could not load staff. Check Firestore rules allow the administrator to read userAccess.</td></tr>';
+    setStaffStatus("Could not load staff list: "+error.message);
+  }
+}
+$("refreshStaffButton").addEventListener("click",loadStaffList);
+$("addStaffButton").addEventListener("click",async()=>{
+  if(!isAdminUser(currentAdmin)) { setStaffStatus("Only the administrator can add staff."); return; }
+  const email=$("newStaffEmail").value.trim().toLowerCase();
+  if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setStaffStatus("Enter a valid staff email address."); return; }
+  const button=$("addStaffButton"); button.disabled=true; button.textContent="Creating account…";
+  let createdUser=null;
+  try {
+    // Generate a random initial password; the staff member will set their own via reset email.
+    const randomBytes=new Uint8Array(24); crypto.getRandomValues(randomBytes);
+    const initialPassword=Array.from(randomBytes,b=>b.toString(16).padStart(2,"0")).join("")+"aA1!";
+    const credential=await staffAuth.createUserWithEmailAndPassword(email,initialPassword);
+    createdUser=credential.user;
+    await db.collection("userAccess").doc(createdUser.uid).set({email,active:true,createdAt:firebase.firestore.FieldValue.serverTimestamp(),createdBy:currentAdmin.uid});
+    await staffAuth.signOut();
+    await staffAuth.sendPasswordResetEmail(email);
+    $("newStaffEmail").value="";
+    setStaffStatus("Staff account created and approved. A password-reset email was sent to "+email+". Ask them to check their inbox and spam folder.","ok");
+    await loadStaffList();
+  } catch(error) {
+    console.error("Could not add staff:",error);
+    try { await staffAuth.signOut(); } catch(_) {}
+    if(createdUser) {
+      setStaffStatus("The Authentication account was created, but setup did not finish. Check Firestore rules and the staff email. The account UID is "+createdUser.uid+"; do not create it again until you check Authentication → Users. Error: "+error.message);
+    } else setStaffStatus("Could not create staff account: "+error.message);
+  } finally { button.disabled=false; button.textContent="Add staff and send setup email"; }
+});
+
+// Firebase login and initial cloud load.
+$("firebaseLoginButton").addEventListener("click", async () => {
+  const email=$("firebaseEmail").value.trim();
+  const password=$("firebasePassword").value;
+  const message=$("firebaseAuthMessage");
+  message.textContent="";
+  try {
+    await auth.signInWithEmailAndPassword(email,password);
+    message.textContent="Checking account access…";
+  } catch(error) {
+    message.textContent="Sign-in failed: "+error.message;
+  }
+});
+$("firebaseLogoutButton").addEventListener("click",()=>auth.signOut());
+$("topbarLogoutButton").addEventListener("click", async () => {
+  const button = $("topbarLogoutButton");
+  button.disabled = true;
+  button.textContent = "Logging out…";
+  try {
+    await auth.signOut();
+    $("firebasePassword").value = "";
+    $("firebaseAuthMessage").textContent = "You have been signed out.";
+  } catch (error) {
+    console.error("Sign-out failed:", error);
+    $("firebaseAuthMessage").textContent = "Could not sign out. Please try again.";
+  } finally {
+    button.disabled = false;
+    button.textContent = "Log out";
+  }
+});
+auth.onAuthStateChanged(async user=>{
+  if(staffAccessUnsubscribe) { staffAccessUnsubscribe(); staffAccessUnsubscribe=null; }
+  currentAdmin=null;
+  if(!user) {
+    $("appContent").hidden=true;
+    $("firebaseLogin").hidden=false;
+    $("firebaseLogoutButton").hidden=true;
+    $("staffNavButton").hidden=true;
+    $("viewStaff").classList.add("hidden");
+    return;
+  }
+
+  // The fixed administrator UID is always trusted. Other accounts must have
+  // an active userAccess/{uid} document in Firestore.
+  let authorized = user.uid === ADMIN_UID;
+  try {
+    if (!authorized) {
+      const accessDoc = await db.collection("userAccess").doc(user.uid).get();
+      authorized = accessDoc.exists && accessDoc.data().active === true;
+    }
+  } catch (accessError) {
+    console.error("Could not verify staff access:", accessError);
+    $("appContent").hidden=true;
+    $("firebaseLogin").hidden=false;
+    $("firebaseLogoutButton").hidden=true;
+    $("firebaseAuthMessage").textContent="Could not verify access. Check Firestore security rules for userAccess.";
+    return;
+  }
+
+  if (!authorized) {
+    $("appContent").hidden=true;
+    $("firebaseLogin").hidden=false;
+    $("firebaseLogoutButton").hidden=true;
+    await auth.signOut();
+    $("firebaseAuthMessage").textContent="This account is not approved for RoboZ records. Contact the administrator.";
+    return;
+  }
+
+  currentAdmin=user;
+  if(!isAdminUser(user)) {
+    staffAccessUnsubscribe=db.collection("userAccess").doc(user.uid).onSnapshot(doc=>{
+      if(!doc.exists || doc.data().active!==true) {
+        auth.signOut().catch(error=>console.error("Could not sign out deactivated staff:",error));
+        $("firebaseAuthMessage").textContent="Your staff access has been deactivated. Contact the administrator if you need access restored.";
+      }
+    },error=>console.error("Could not monitor staff access status:",error));
+  }
+  $("staffNavButton").hidden=!isAdminUser(user);
+  const adminLabel=document.querySelector(".admin span");
+  if(adminLabel) adminLabel.textContent=user.email|| (isAdminUser(user)?"Admin":"Staff");
+  $("firebaseLogin").hidden=true;
+  $("appContent").hidden=false;
+  $("firebaseLogoutButton").hidden=false;
+  try {
+    const snap=await db.collection("teams").get();
+    teams=snap.docs.map(doc=>({...doc.data(),id:doc.id}));
+    // Ensure values needed by the interface have safe defaults.
+    teams=teams.map(t=>({...t,names:Array.isArray(t.names)?t.names:[],codes:Array.isArray(t.codes)?t.codes:[],codeKeys:Array.isArray(t.codeKeys)?t.codeKeys:[],category:t.category||""}));
+    schools=[...new Set(teams.map(t=>t.school).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+    const select=$("schoolSelect");select.replaceChildren(new Option("Choose a school...",""));
+    schools.forEach(s=>select.add(new Option(s,s)));
+    init();
+  } catch(error) {
+    console.error(error);
+    $("firebaseAuthMessage").textContent="Signed in, but records could not load: "+error.message;
+    $("firebaseLogin").hidden=false;$("appContent").hidden=true;
+  }
+});
+</script>
+
+
+
+</body>
+</html>
