@@ -179,13 +179,20 @@ td:first-child { font-weight: 700; }
 .login-card input{width:100%;padding:12px;border:1px solid #d8e2eb;border-radius:10px}
 .login-card button{margin-top:16px;width:100%;padding:12px;border:0;border-radius:10px;background:#07884f;color:white;font-weight:750}
 #firebaseAuthMessage{color:#b42318;overflow-wrap:anywhere}
+.staff-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.staff-table{width:100%;border-collapse:collapse;font-size:12px}
+.staff-table th,.staff-table td{padding:11px 9px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+.staff-table th{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em}
+.staff-status{display:inline-block;padding:4px 8px;border-radius:99px;background:#dcfce9;color:#166534;font-weight:750;font-size:10px}
+.staff-status.inactive{background:#fee2e2;color:#991b1b}
+@media(max-width:650px){.staff-grid{grid-template-columns:1fr}.staff-table{min-width:560px}}
 </style>
 </head>
 <body>
 <section id="firebaseLogin">
   <div class="login-card">
-    <h1>RoboZ Administrator Login</h1>
-    <p>Sign in with your authorized Firebase administrator account to access participant records.</p>
+    <h1>RoboZ Participant Management</h1>
+    <p>Sign in with your Firebase account. Only the administrator and approved staff can access participant records.</p>
     <label for="firebaseEmail">Email</label>
     <input id="firebaseEmail" type="email" autocomplete="username" required>
     <label for="firebasePassword">Password</label>
@@ -204,6 +211,7 @@ td:first-child { font-weight: 700; }
     <nav class="nav">
       <button type="button" class="active" data-view="add"><span class="nav-icon" aria-hidden="true">＋</span><span>Add Participants</span></button>
       <button type="button" data-view="preview"><span class="nav-icon" aria-hidden="true">▤</span><span>Data Preview</span></button>
+      <button type="button" data-view="staff" id="staffNavButton" hidden><span class="nav-icon" aria-hidden="true">♙</span><span>Manage Staff</span></button>
     </nav>
     <div class="sidebar-note">School-first registration<br>Teams · Divisions · Games</div>
   </aside>
@@ -215,7 +223,7 @@ td:first-child { font-weight: 700; }
         <h1 id="pageTitle">Participant Registration</h1>
         <div class="top-sub" id="pageSub">Register a school team in a few clear steps.</div>
       </div>
-      <div class="admin"><div class="avatar" aria-hidden="true">AD</div><span>Admin</span></div>
+      <div class="admin"><div class="avatar" aria-hidden="true">AD</div><span>Admin</span><button type="button" class="btn" id="topbarLogoutButton" aria-label="Sign out of RoboZ Participant Management">Log out</button></div>
     </header>
 
     <div class="content">
@@ -327,6 +335,29 @@ td:first-child { font-weight: 700; }
         <div id="teamsList" class="teams-list"><div class="empty">No teams registered yet. Your registered teams will appear here.</div></div>
       </section>
 
+      <section id="viewStaff" class="hidden">
+        <section class="panel">
+          <div class="panel-head"><div class="panel-icon" aria-hidden="true">♙</div><div><h3>Manage staff access</h3><p>Only the administrator can add staff accounts or deactivate their access. Staff can manage participant records but cannot manage other staff.</p></div></div>
+          <div class="staff-grid">
+            <div>
+              <label class="field-label" for="newStaffEmail">Staff email address</label>
+              <input id="newStaffEmail" class="field" type="email" autocomplete="off" placeholder="staff@example.com" required>
+              <p class="hint">A Firebase account will be created and a password-reset email will be sent so the staff member can set their own password.</p>
+              <button type="button" class="btn primary" id="addStaffButton">Add staff and send setup email</button>
+            </div>
+            <div>
+              <p class="hint">Removing access sets the staff account to inactive in Firestore. It does not delete their Firebase Authentication account or participant records.</p>
+              <button type="button" class="btn" id="refreshStaffButton">Refresh staff list</button>
+            </div>
+          </div>
+          <div id="staffStatus" class="status" role="status" aria-live="polite"></div>
+        </section>
+        <section class="panel">
+          <div class="teams-head"><div><h3>Staff accounts</h3><div class="top-sub">Active staff can sign in. Inactive staff will be denied access on their next authorization check.</div></div></div>
+          <div class="table-wrap"><table class="staff-table"><thead><tr><th>Email</th><th>UID</th><th>Status</th><th>Action</th></tr></thead><tbody id="staffTableBody"><tr><td colspan="4">Load the staff list to view accounts.</td></tr></tbody></table></div>
+        </section>
+      </section>
+
       <p class="hint">Participant records are stored in Firebase Cloud Firestore and load when you sign in.</p>
     </div>
   </main>
@@ -366,7 +397,12 @@ const ADMIN_UID = "S0URKSpcOmNaK7w8WSVFrLlfnUD2";
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
+// A secondary Auth instance creates staff accounts without signing the administrator out.
+const staffApp = firebase.initializeApp(firebaseConfig, "RoboZStaffAccountCreator");
+const staffAuth = staffApp.auth();
 let currentAdmin = null;
+let staffAccessUnsubscribe = null;
+const isAdminUser = user => !!user && user.uid === ADMIN_UID;
 
 const gamesByDivision = {
   Lower: ["Zumobot","Sumo Blockly League","PLT-Beginner","Z-Puck Tri-Bot Hockey","maZe Robot","AERO Z- Drone Soccer"],
@@ -691,14 +727,18 @@ $("toggleTeams").addEventListener("click",()=>{
   list.classList.toggle("hidden",hidden);$("toggleTeams").textContent=hidden?"Show list":"Hide list";$("toggleTeams").setAttribute("aria-expanded",String(!hidden));
 });
 function setView(view) {
-  const preview=view==="preview";
-  $("viewAdd").classList.toggle("hidden",preview);$("viewPreview").classList.toggle("hidden",!preview);
-  $("teamsPanel").classList.toggle("hidden",preview);
-  $("intro").classList.toggle("hidden",preview);
+  if(view === "staff" && !isAdminUser(currentAdmin)) return;
+  const preview=view==="preview", staff=view==="staff";
+  $("viewAdd").classList.toggle("hidden",preview||staff);
+  $("viewPreview").classList.toggle("hidden",!preview);
+  $("viewStaff").classList.toggle("hidden",!staff);
+  $("teamsPanel").classList.toggle("hidden",preview||staff);
+  $("intro").classList.toggle("hidden",preview||staff);
   document.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===view));
-  $("pageTitle").textContent=preview?"Participant Data Preview":"Participant Registration";
-  $("pageSub").textContent=preview?"Search and review registered participant records.":"Register a school team in a few clear steps.";
+  $("pageTitle").textContent=preview?"Participant Data Preview":staff?"Manage Staff Access":"Participant Registration";
+  $("pageSub").textContent=preview?"Search and review registered participant records.":staff?"Add staff accounts or deactivate access.":"Register a school team in a few clear steps.";
   if(preview)renderPreview();
+  if(staff)loadStaffList();
   window.scrollTo({top:0,behavior:"smooth"});
 }
 document.querySelectorAll("[data-view]").forEach(b=>b.addEventListener("click",()=>setView(b.dataset.view)));
@@ -893,6 +933,75 @@ $("confirmImportBtn").addEventListener("click",async ()=>{
 function init() {
   updateSummary();renderMembers();renderTeams();renderPreview();updateStats();
 }
+// Staff management. Admin permissions are also enforced by Firestore rules.
+function setStaffStatus(message,type="err") {
+  const el=$("staffStatus"); el.textContent=message; el.className="status show "+type;
+}
+function safeText(value) { return String(value ?? ""); }
+async function loadStaffList() {
+  if(!isAdminUser(currentAdmin)) return;
+  const body=$("staffTableBody");
+  body.innerHTML='<tr><td colspan="4">Loading staff accounts…</td></tr>';
+  try {
+    const snap=await db.collection("userAccess").get();
+    const docs=snap.docs.filter(doc=>doc.id!==ADMIN_UID).sort((a,b)=>safeText(a.data().email).localeCompare(safeText(b.data().email)));
+    body.replaceChildren();
+    if(!docs.length) {
+      const tr=document.createElement("tr"), td=document.createElement("td"); td.colSpan=4; td.textContent="No staff access records found."; tr.appendChild(td); body.appendChild(tr); return;
+    }
+    docs.forEach(doc=>{
+      const data=doc.data(), active=data.active===true, tr=document.createElement("tr");
+      const email=document.createElement("td"); email.textContent=data.email||"Email not recorded";
+      const uid=document.createElement("td"); uid.textContent=doc.id;
+      const status=document.createElement("td"), badge=document.createElement("span"); badge.className="staff-status"+(active?"":" inactive"); badge.textContent=active?"Active":"Inactive"; status.appendChild(badge);
+      const action=document.createElement("td"), button=document.createElement("button"); button.type="button"; button.className="btn small"; button.textContent=active?"Remove access":"Restore access";
+      button.addEventListener("click",async()=>{
+        if(!isAdminUser(currentAdmin)) return;
+        const verb=active?"remove access for":"restore access for";
+        if(!confirm(`Are you sure you want to ${verb} ${data.email||doc.id}?`)) return;
+        button.disabled=true;
+        try {
+          await db.collection("userAccess").doc(doc.id).set({active:!active,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedBy:currentAdmin.uid},{merge:true});
+          setStaffStatus(active?"Staff access has been deactivated.":"Staff access has been restored.","ok");
+          await loadStaffList();
+        } catch(error) { setStaffStatus("Could not update staff access: "+error.message); button.disabled=false; }
+      });
+      action.appendChild(button); tr.append(email,uid,status,action); body.appendChild(tr);
+    });
+  } catch(error) {
+    console.error("Could not load staff list:",error);
+    body.innerHTML='<tr><td colspan="4">Could not load staff. Check Firestore rules allow the administrator to read userAccess.</td></tr>';
+    setStaffStatus("Could not load staff list: "+error.message);
+  }
+}
+$("refreshStaffButton").addEventListener("click",loadStaffList);
+$("addStaffButton").addEventListener("click",async()=>{
+  if(!isAdminUser(currentAdmin)) { setStaffStatus("Only the administrator can add staff."); return; }
+  const email=$("newStaffEmail").value.trim().toLowerCase();
+  if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setStaffStatus("Enter a valid staff email address."); return; }
+  const button=$("addStaffButton"); button.disabled=true; button.textContent="Creating account…";
+  let createdUser=null;
+  try {
+    // Generate a random initial password; the staff member will set their own via reset email.
+    const randomBytes=new Uint8Array(24); crypto.getRandomValues(randomBytes);
+    const initialPassword=Array.from(randomBytes,b=>b.toString(16).padStart(2,"0")).join("")+"aA1!";
+    const credential=await staffAuth.createUserWithEmailAndPassword(email,initialPassword);
+    createdUser=credential.user;
+    await db.collection("userAccess").doc(createdUser.uid).set({email,active:true,createdAt:firebase.firestore.FieldValue.serverTimestamp(),createdBy:currentAdmin.uid});
+    await staffAuth.signOut();
+    await staffAuth.sendPasswordResetEmail(email);
+    $("newStaffEmail").value="";
+    setStaffStatus("Staff account created and approved. A password-reset email was sent to "+email+". Ask them to check their inbox and spam folder.","ok");
+    await loadStaffList();
+  } catch(error) {
+    console.error("Could not add staff:",error);
+    try { await staffAuth.signOut(); } catch(_) {}
+    if(createdUser) {
+      setStaffStatus("The Authentication account was created, but setup did not finish. Check Firestore rules and the staff email. The account UID is "+createdUser.uid+"; do not create it again until you check Authentication → Users. Error: "+error.message);
+    } else setStaffStatus("Could not create staff account: "+error.message);
+  } finally { button.disabled=false; button.textContent="Add staff and send setup email"; }
+});
+
 // Firebase login and initial cloud load.
 $("firebaseLoginButton").addEventListener("click", async () => {
   const email=$("firebaseEmail").value.trim();
@@ -900,26 +1009,79 @@ $("firebaseLoginButton").addEventListener("click", async () => {
   const message=$("firebaseAuthMessage");
   message.textContent="";
   try {
-    const credential=await auth.signInWithEmailAndPassword(email,password);
-    if(credential.user.uid!==ADMIN_UID) {
-      await auth.signOut();
-      message.textContent="This account is not authorized to manage RoboZ records.";
-    }
+    await auth.signInWithEmailAndPassword(email,password);
+    message.textContent="Checking account access…";
   } catch(error) {
     message.textContent="Sign-in failed: "+error.message;
   }
 });
 $("firebaseLogoutButton").addEventListener("click",()=>auth.signOut());
+$("topbarLogoutButton").addEventListener("click", async () => {
+  const button = $("topbarLogoutButton");
+  button.disabled = true;
+  button.textContent = "Logging out…";
+  try {
+    await auth.signOut();
+    $("firebasePassword").value = "";
+    $("firebaseAuthMessage").textContent = "You have been signed out.";
+  } catch (error) {
+    console.error("Sign-out failed:", error);
+    $("firebaseAuthMessage").textContent = "Could not sign out. Please try again.";
+  } finally {
+    button.disabled = false;
+    button.textContent = "Log out";
+  }
+});
 auth.onAuthStateChanged(async user=>{
+  if(staffAccessUnsubscribe) { staffAccessUnsubscribe(); staffAccessUnsubscribe=null; }
   currentAdmin=null;
-  if(!user || user.uid!==ADMIN_UID) {
+  if(!user) {
     $("appContent").hidden=true;
     $("firebaseLogin").hidden=false;
     $("firebaseLogoutButton").hidden=true;
-    if(user) { await auth.signOut(); $("firebaseAuthMessage").textContent="This account is not authorized."; }
+    $("staffNavButton").hidden=true;
+    $("viewStaff").classList.add("hidden");
     return;
   }
+
+  // The fixed administrator UID is always trusted. Other accounts must have
+  // an active userAccess/{uid} document in Firestore.
+  let authorized = user.uid === ADMIN_UID;
+  try {
+    if (!authorized) {
+      const accessDoc = await db.collection("userAccess").doc(user.uid).get();
+      authorized = accessDoc.exists && accessDoc.data().active === true;
+    }
+  } catch (accessError) {
+    console.error("Could not verify staff access:", accessError);
+    $("appContent").hidden=true;
+    $("firebaseLogin").hidden=false;
+    $("firebaseLogoutButton").hidden=true;
+    $("firebaseAuthMessage").textContent="Could not verify access. Check Firestore security rules for userAccess.";
+    return;
+  }
+
+  if (!authorized) {
+    $("appContent").hidden=true;
+    $("firebaseLogin").hidden=false;
+    $("firebaseLogoutButton").hidden=true;
+    await auth.signOut();
+    $("firebaseAuthMessage").textContent="This account is not approved for RoboZ records. Contact the administrator.";
+    return;
+  }
+
   currentAdmin=user;
+  if(!isAdminUser(user)) {
+    staffAccessUnsubscribe=db.collection("userAccess").doc(user.uid).onSnapshot(doc=>{
+      if(!doc.exists || doc.data().active!==true) {
+        auth.signOut().catch(error=>console.error("Could not sign out deactivated staff:",error));
+        $("firebaseAuthMessage").textContent="Your staff access has been deactivated. Contact the administrator if you need access restored.";
+      }
+    },error=>console.error("Could not monitor staff access status:",error));
+  }
+  $("staffNavButton").hidden=!isAdminUser(user);
+  const adminLabel=document.querySelector(".admin span");
+  if(adminLabel) adminLabel.textContent=user.email|| (isAdminUser(user)?"Admin":"Staff");
   $("firebaseLogin").hidden=true;
   $("appContent").hidden=false;
   $("firebaseLogoutButton").hidden=false;
